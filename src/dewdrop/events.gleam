@@ -31,3 +31,12 @@ pub const nack = "nack"
 
 /// Connection close event.
 pub const close = "close"
+
+/// Outbound: client submits a summary/snapshot for the document.
+pub const submit_summary = "submitSummary"
+
+/// Inbound: server acknowledges an accepted summary.
+pub const summary_ack = "summaryAck"
+
+/// Inbound: server rejects a summary.
+pub const summary_nack = "summaryNack"
