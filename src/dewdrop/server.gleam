@@ -18,7 +18,7 @@
 import beryl/wire/codec.{
   type Codec, type DecodeError, type Frame, type Inbound, type ReplyStatus,
   Codec, Event, Heartbeat, Inbound, InvalidFormat, InvalidJson, Join, Leave,
-  TextFrame,
+  StatusError, StatusOk, TextFrame,
 }
 import dewdrop/events
 import dewdrop/frame
@@ -106,10 +106,13 @@ fn encode_reply(
   _join_ref: option.Option(String),
   _ref: option.Option(String),
   _topic: String,
-  _status: ReplyStatus,
+  status: ReplyStatus,
   payload: Json,
 ) -> Frame {
-  TextFrame(frame.encode(events.connect_document_success, [payload]))
+  case status {
+    StatusOk -> TextFrame(frame.encode(events.connect_document_success, [payload]))
+    StatusError -> TextFrame(frame.encode(events.connect_document_error, [payload]))
+  }
 }
 
 fn encode_push(_topic: String, event: String, payload: Json) -> Frame {

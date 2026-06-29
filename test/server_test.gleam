@@ -1,5 +1,5 @@
 import beryl/wire/codec.{
-  Event, Heartbeat, Join, Leave, StatusOk, TextFrame,
+  Event, Heartbeat, Join, Leave, StatusError, StatusOk, TextFrame,
 }
 import dewdrop/server
 import gleam/json
@@ -49,6 +49,11 @@ pub fn server_codec_tests() {
       let c = server.server_codec()
       c.encode_reply(None, None, "t", StatusOk, json.string("ok"))
       |> expect.to_equal(TextFrame("42[\"connect_document_success\",\"ok\"]"))
+    }),
+    it("encodes an error reply as connect_document_error", fn() {
+      let c = server.server_codec()
+      c.encode_reply(None, None, "t", StatusError, json.string("nope"))
+      |> expect.to_equal(TextFrame("42[\"connect_document_error\",\"nope\"]"))
     }),
     it("answers heartbeat with engine.io pong", fn() {
       let c = server.server_codec()
