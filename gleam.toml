@@ -1,0 +1,15 @@
+name = "dewdrop"
+version = "0.1.0"
+description = "Fluid Framework protocol codec for aquamarine channel clients"
+licences = ["MIT"]
+repository = { type = "github", user = "tylerbutler", repo = "dewdrop" }
+gleam = ">= 1.7.0"
+target = "erlang"
+
+[dependencies]
+gleam_stdlib = ">= 0.48.0 and < 2.0.0"
+gleam_json = ">= 3.0.0 and < 4.0.0"
+aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "main" }
+
+[dev-dependencies]
+startest = ">= 0.8.0 and < 1.0.0"
