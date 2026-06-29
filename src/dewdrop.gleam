@@ -13,35 +13,31 @@
 //// around reply matching remains open.
 
 import aquamarine/codec as aquamarine_codec
+import dewdrop/events
 import dewdrop/frame
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode as dynamic_decode
 import gleam/json
 import gleam/option.{type Option, None, Some}
 
-/// Outbound: client pushes `connect_document` to begin collaboration.
-pub const connect_document = "connect_document"
+/// Event-name vocabulary lives in `dewdrop/events` so importers can use the
+/// names without depending on aquamarine or beryl. Re-exported here for
+/// backwards compatibility.
+pub const connect_document = events.connect_document
 
-/// Inbound: server acknowledges a successful `connect_document`.
-pub const connect_document_success = "connect_document_success"
+pub const connect_document_success = events.connect_document_success
 
-/// Inbound: server rejects a `connect_document` attempt.
-pub const connect_document_error = "connect_document_error"
+pub const connect_document_error = events.connect_document_error
 
-/// Outbound: client submits ops.
-pub const submit_op = "submitOp"
+pub const submit_op = events.submit_op
 
-/// Outbound: client submits signals.
-pub const submit_signal = "submitSignal"
+pub const submit_signal = events.submit_signal
 
-/// Inbound: sequenced ops from the server.
-pub const op = "op"
+pub const op = events.op
 
-/// Inbound: signals from the server.
-pub const signal = "signal"
+pub const signal = events.signal
 
-/// Inbound: rejected ops.
-pub const nack = "nack"
+pub const nack = events.nack
 
 /// Build an `aquamarine/codec.Codec` for Fluid event frames.
 pub fn codec() -> aquamarine_codec.Codec {
@@ -54,7 +50,7 @@ pub fn codec() -> aquamarine_codec.Codec {
     reply_status: reply_status,
     join_event: connect_document,
     reply_event: connect_document_success,
-    close_event: "close",
+    close_event: events.close,
     error_event: connect_document_error,
     heartbeat_topic: "",
   )
