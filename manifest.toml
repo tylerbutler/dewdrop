@@ -4,7 +4,7 @@
 packages = [
   { name = "aquamarine", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_json", "gleam_otp", "gleam_stdlib", "gluegun", "roost"], source = "git", repo = "https://github.com/tylerbutler/aquamarine", commit = "45451e8a5b8846258dd4a5e72094078423b82017" },
   { name = "argv", version = "1.1.0", build_tools = ["gleam"], requirements = [], otp_app = "argv", source = "hex", outer_checksum = "3277D100448BDB4A29B6D58C0F36F631CBC349E8BDD09766C6309DF202831140" },
-  { name = "beryl", version = "0.1.0", build_tools = ["gleam"], requirements = ["envoy", "gleam_crypto", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "lattice_presence", "mist", "palabres"], source = "local", path = "../beryl" },
+  { name = "beryl", version = "0.1.0", build_tools = ["gleam"], requirements = ["envoy", "gleam_crypto", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "lattice_presence", "mist", "palabres"], source = "git", repo = "https://github.com/tylerbutler/beryl", commit = "a0f22f2162092356bc0686c430dc2230fd70cd52" },
   { name = "bigben", version = "2.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "gleam_time", "interior"], otp_app = "bigben", source = "hex", outer_checksum = "4B0D9F2514C06AE577F284532270A6F89007781620E4B12A843388BA549C17D2" },
   { name = "cowlib", version = "2.17.1", build_tools = ["make", "rebar3"], requirements = [], otp_app = "cowlib", source = "hex", outer_checksum = "FF08BD17E6DD931445B18AF77315B9B5FE052407110964AD2588C686B57B5E3F" },
   { name = "envoy", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "9C6FBB6BFA02A52798BEEC5977A738CAD6E4A057F4B67FD0C8061AD2502C191A" },
@@ -42,7 +42,7 @@ packages = [
 
 [requirements]
 aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "main" }
-beryl = { path = "../beryl" }
+beryl = { git = "https://github.com/tylerbutler/beryl", ref = "main" }
 gleam_json = { version = ">= 3.0.0 and < 4.0.0" }
 gleam_stdlib = { version = ">= 0.48.0 and < 2.0.0" }
 startest = { version = ">= 0.8.0 and < 1.0.0" }
