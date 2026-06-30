@@ -2,3 +2,7 @@
 *.ez
 /build
 erl_crash.dump
+
+website/node_modules
+website/dist
+website/.astro
