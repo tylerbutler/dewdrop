@@ -3,38 +3,50 @@ import '../styles/global.css';
 
 const events = [
   { name: 'connect_document', direction: 'client -> server', purpose: 'Begin collaboration for a document.' },
-  { name: 'connect_document_success', direction: 'server -> client', purpose: 'Acknowledge a successful join and carry the reply reference.' },
+  { name: 'connect_document_success', direction: 'server -> client', purpose: 'Acknowledge a successful join.' },
+  { name: 'connect_document_error', direction: 'server -> client', purpose: 'Reject a document connection attempt.' },
   { name: 'submitOp', direction: 'client -> server', purpose: 'Submit operation messages for sequencing.' },
   { name: 'op', direction: 'server -> client', purpose: 'Deliver sequenced operations back to clients.' },
   { name: 'submitSignal', direction: 'client -> server', purpose: 'Send non-persistent collaboration signals.' },
-  { name: 'nack', direction: 'server -> client', purpose: 'Reject submitted operations explicitly.' }
+  { name: 'signal', direction: 'server -> client', purpose: 'Broadcast non-persistent collaboration signals.' },
+  { name: 'nack', direction: 'server -> client', purpose: 'Reject submitted operations explicitly.' },
+  { name: 'close', direction: 'either', purpose: 'Close a document connection.' },
+  { name: 'submitSummary', direction: 'client -> server', purpose: 'Submit a summary for the document.' },
+  { name: 'summaryAck', direction: 'server -> client', purpose: 'Acknowledge an accepted summary.' },
+  { name: 'summaryNack', direction: 'server -> client', purpose: 'Reject a submitted summary.' }
 ];
 
-const stack = [
-  ['dewdrop', 'Fluid Socket.IO frames and event vocabulary.'],
-  ['aquamarine', 'Channel client runtime that can plug in dewdrop as a codec.'],
-  ['roost', 'Phoenix channel frame codec; intentionally not reused for Fluid.'],
-  ['levee', 'Fluid server target for in-VM integration tests.']
+const layers = [
+  { name: 'windsock', role: 'Socket.IO frame primitives', detail: 'Encodes and decodes raw text frames such as 42["event", ...args], plus Engine.IO heartbeat packets.' },
+  { name: 'dewdrop', role: 'Fluid events and adapters', detail: 'Names the Fluid event vocabulary and exposes client/server codec adapters over the windsock frame shape.' },
+  { name: 'spillway', role: 'Raw Fluid protocol model', detail: 'Owns protocol payloads, sequencing, sessions, JWT/auth, and domain types above event transport.' },
+  { name: 'levee', role: 'Server runtime target', detail: 'Consumes the protocol layers to run Fluid-compatible collaboration services in Gleam.' }
 ];
 
 const quickstart = `import dewdrop
 import gleam/json
 
-pub fn join_frame() {
+pub fn connect_frame() {
   dewdrop.encode_connect(
     json.object([#("id", json.string("doc-123"))])
   )
 }
 
 // 42["connect_document",{"id":"doc-123"}]`;
+
+const serverAdapter = `import dewdrop/server
+
+pub fn codec() {
+  server.server_codec()
+}`;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>dewdrop — Fluid protocol frames for Gleam</title>
-    <meta name="description" content="dewdrop is a Gleam library for canonical Fluid Framework Socket.IO frames, event vocabulary, and aquamarine codec integration." />
+    <title>dewdrop — Fluid events and adapters for Gleam</title>
+    <meta name="description" content="dewdrop is a Gleam library for Fluid Framework event vocabulary and client/server codec adapters over Socket.IO frames." />
     <link rel="icon" href="/dewdrop-icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
@@ -48,7 +60,7 @@ pub fn join_frame() {
         </a>
         <div class="nav-links" aria-label="Page sections">
           <a href="#quickstart">Quickstart</a>
-          <a href="#frames">Frames</a>
+          <a href="#layers">Layers</a>
           <a href="#events">Events</a>
           <a href="https://github.com/tylerbutler/dewdrop">GitHub</a>
         </div>
@@ -58,32 +70,32 @@ pub fn join_frame() {
     <main id="content">
       <section class="hero shell" id="top">
         <div class="hero-copy">
-          <p class="context-line">Fluid Framework protocol codec for Gleam</p>
-          <h1>Canonical Socket.IO frames, without Phoenix-shaped assumptions.</h1>
-          <p class="hero-lede">dewdrop gives Gleam clients a precise Fluid wire vocabulary: event packets, positional arguments, heartbeat handling, and an aquamarine codec boundary that stays honest about Socket.IO.</p>
+          <p class="context-line">Fluid protocol surface for Gleam</p>
+          <h1>Fluid event vocabulary, with adapters at the edge.</h1>
+          <p class="hero-lede">dewdrop sits above raw Socket.IO frames and below the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow codec boundary.</p>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="#quickstart">Start with a frame</a>
+            <a class="button primary" href="#quickstart">Inspect the boundary</a>
             <a class="button secondary" href="https://github.com/tylerbutler/dewdrop">View source</a>
           </div>
         </div>
 
-        <div class="protocol-panel" aria-label="Socket.IO frame anatomy">
+        <div class="protocol-panel" aria-label="Dewdrop package boundary">
           <div class="panel-topline">
-            <span>packet</span>
-            <code>42["submitOp", clientId, messages]</code>
+            <span>dewdrop boundary</span>
+            <code>connect_document(payload) -> 42["connect_document", payload]</code>
           </div>
           <dl class="frame-map">
             <div>
-              <dt>42</dt>
-              <dd>Socket.IO event packet prefix</dd>
+              <dt>Fluid name</dt>
+              <dd><code>connect_document</code> lives in <code>dewdrop/events</code>.</dd>
             </div>
             <div>
-              <dt>submitOp</dt>
-              <dd>Fluid event name</dd>
+              <dt>Frame shape</dt>
+              <dd><code>windsock</code> owns the raw <code>42[...]</code> packet.</dd>
             </div>
             <div>
-              <dt>clientId, messages</dt>
-              <dd>positional arguments, kept in order</dd>
+              <dt>Runtime edge</dt>
+              <dd>Client and server adapters translate events into codec messages.</dd>
             </div>
           </dl>
           <div class="pulse-line" aria-hidden="true">
@@ -95,44 +107,51 @@ pub fn join_frame() {
       <section class="section shell" id="quickstart" aria-labelledby="quickstart-title">
         <div class="section-heading">
           <h2 id="quickstart-title">Small API, exact output.</h2>
-          <p>Encode Fluid events as the packets the canonical client expects. Decode inbound event packets without forcing them through a Phoenix tuple.</p>
+          <p>Use dewdrop when the code needs to speak in Fluid events. Use windsock when the code only needs to parse or emit Socket.IO packet text.</p>
         </div>
         <div class="code-layout">
-          <pre aria-label="Gleam quickstart"><code>{quickstart}</code></pre>
+          <pre aria-label="Gleam client encoder example"><code>{quickstart}</code></pre>
           <div class="notes-list" aria-label="What dewdrop owns">
-            <h3>What stays explicit</h3>
+            <h3>What dewdrop owns</h3>
             <ul>
-              <li>Fluid event names live in <code>dewdrop/events</code>.</li>
-              <li>Socket.IO packets are encoded in <code>dewdrop/frame</code>.</li>
-              <li>Dynamic args remain positional until callers decode their schema.</li>
+              <li>Fluid event constants in <code>dewdrop/events</code>.</li>
+              <li>Common client encoders like <code>encode_connect</code> and <code>encode_submit_op</code>.</li>
+              <li>Codec adapters that let client and server runtimes speak the same Fluid event stream.</li>
             </ul>
           </div>
         </div>
+        <div class="adapter-strip" aria-label="Client and server adapter examples">
+          <article>
+            <h3>Client adapter</h3>
+            <p><code>dewdrop.codec()</code> maps Fluid join/reply events onto a channel client codec.</p>
+          </article>
+          <article>
+            <h3>Server adapter</h3>
+            <pre aria-label="Gleam server codec example"><code>{serverAdapter}</code></pre>
+          </article>
+        </div>
       </section>
 
-      <section class="section shell frame-section" id="frames" aria-labelledby="frames-title">
+      <section class="section shell layer-section" id="layers" aria-labelledby="layers-title">
         <div class="section-heading compact">
-          <h2 id="frames-title">The frame is the product boundary.</h2>
-          <p>roost models Phoenix channels. dewdrop models Fluid’s canonical Socket.IO shape.</p>
+          <h2 id="layers-title">The split is a stack, not a bigger package.</h2>
+          <p>Each layer owns one kind of knowledge. Raw frame syntax, Fluid event names, protocol semantics, and server behavior stay separate.</p>
         </div>
-        <div class="comparison" role="list" aria-label="Frame comparison">
-          <article role="listitem">
-            <h3>Fluid via dewdrop</h3>
-            <code>42["event", ...args]</code>
-            <p>Event name plus ordered arguments. No topic, no ref slot, no Phoenix join tuple.</p>
-          </article>
-          <article role="listitem">
-            <h3>Phoenix via roost</h3>
-            <code>[join_ref, ref, topic, event, payload]</code>
-            <p>A five-part channel tuple with correlation fields built into the frame shape.</p>
-          </article>
+        <div class="layer-map" role="list" aria-label="Fluid Gleam stack layers">
+          {layers.map((layer) => (
+            <article class={`layer-card ${layer.name === 'dewdrop' ? 'current' : ''}`} role="listitem">
+              <span>{layer.name}</span>
+              <h3>{layer.role}</h3>
+              <p>{layer.detail}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section class="section shell" id="events" aria-labelledby="events-title">
         <div class="section-heading">
           <h2 id="events-title">Fluid event vocabulary, ready to import.</h2>
-          <p>The constants are dependency-free so downstream protocol packages can share names without pulling in a client runtime.</p>
+          <p>The event catalog is dependency-light so protocol packages can share the same names without inheriting a transport client or server runtime.</p>
         </div>
         <div class="event-table" role="table" aria-label="Fluid event vocabulary">
           <div class="event-row header" role="row">
@@ -145,21 +164,6 @@ pub fn join_frame() {
               <code role="cell">{event.name}</code>
               <span role="cell">{event.direction}</span>
               <span role="cell">{event.purpose}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section class="section shell stack-section" aria-labelledby="stack-title">
-        <div class="stack-copy">
-          <h2 id="stack-title">Built for the Fluid/Gleam stack.</h2>
-          <p>dewdrop is intentionally narrow. It should make a future in-VM levee integration client easier to test, not become a broad collaboration framework.</p>
-        </div>
-        <div class="stack-list" aria-label="Related packages">
-          {stack.map(([name, description]) => (
-            <div class="stack-item">
-              <strong>{name}</strong>
-              <span>{description}</span>
             </div>
           ))}
         </div>
