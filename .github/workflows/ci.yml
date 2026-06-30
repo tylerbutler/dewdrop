@@ -24,6 +24,8 @@ jobs:
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+        with:
+          version-type: loose
 
       - name: Check formatting
         run: just format-check
@@ -49,6 +51,8 @@ jobs:
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+        with:
+          version-type: loose
 
       - name: Build documentation
         run: just docs
