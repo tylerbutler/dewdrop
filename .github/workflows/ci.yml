@@ -13,19 +13,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        otp-version: ["26", "27", "28"]
+        include:
+          - otp-version: "26"
+            erlang-version: "26.2.5.21"
+          - otp-version: "27"
+            erlang-version: "27.3.4.13"
+          - otp-version: "28"
+            erlang-version: "28.5.0.2"
     name: Test Erlang (OTP ${{ matrix.otp-version }})
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
 
       - name: Write BEAM tool versions
         run: |
-          printf 'erlang %s\ngleam 1.16.0\nrebar 3\n' '${{ matrix.otp-version }}' > .tool-versions
+          printf 'erlang %s\ngleam 1.16.0\nrebar 3\n' '${{ matrix.erlang-version }}' > .tool-versions
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
-        with:
-          version-type: loose
 
       - name: Check formatting
         run: just format-check
@@ -47,12 +51,10 @@ jobs:
 
       - name: Write BEAM tool versions
         run: |
-          printf 'erlang 27\ngleam 1.16.0\nrebar 3\n' > .tool-versions
+          printf 'erlang 27.3.4.13\ngleam 1.16.0\nrebar 3\n' > .tool-versions
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
-        with:
-          version-type: loose
 
       - name: Build documentation
         run: just docs
