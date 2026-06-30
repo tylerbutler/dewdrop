@@ -84,7 +84,7 @@ clean:
 # === CI ===
 
 # Run all CI checks (format, check, test, build)
-ci: format-check check test build-strict
+ci: format-check check test build-strict docs
 
 # Alias for PR checks
 alias pr := ci

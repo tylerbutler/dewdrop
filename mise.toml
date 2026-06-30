@@ -1,4 +1,0 @@
-# Tool versions are defined in .tool-versions (asdf-compatible format),
-# which mise reads automatically.
-[tools]
-node = "24"
