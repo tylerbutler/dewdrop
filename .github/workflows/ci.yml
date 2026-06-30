@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_call:
+
+jobs:
+  test-erlang:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - otp-version: "27"
+            erlang-version: "27.3.4.13"
+          - otp-version: "28"
+            erlang-version: "28.5.0.2"
+    name: Test Erlang (OTP ${{ matrix.otp-version }})
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
+
+      - name: Write BEAM tool versions
+        run: |
+          printf 'erlang %s\ngleam 1.16.0\nrebar 3.27.0\n' '${{ matrix.erlang-version }}' > .tool-versions
+
+      - name: Setup environment
+        uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+
+      - name: Check formatting
+        run: just format-check
+
+      - name: Type check
+        run: just check
+
+      - name: Build (warnings as errors)
+        run: just build-strict
+
+      - name: Run tests
+        run: just test
+
+  docs:
+    runs-on: ubuntu-latest
+    name: Docs
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
+
+      - name: Write BEAM tool versions
+        run: |
+          printf 'erlang 27.3.4.13\ngleam 1.16.0\nrebar 3.27.0\n' > .tool-versions
+
+      - name: Setup environment
+        uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+
+      - name: Build documentation
+        run: just docs

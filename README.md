@@ -6,8 +6,9 @@ Fluid Framework protocol codec for Gleam — the Fluid analogue of [roost](https
 
 ## What it does
 
-- Owns the canonical Fluid Socket.IO wire frame: an event name plus positional
-  args (`42["event", ...args]`), in `dewdrop/frame`.
+- Uses [windsock](https://github.com/tylerbutler/windsock) for canonical
+  Socket.IO text frames: an event name plus positional args
+  (`42["event", ...args]`).
 - Provides the Fluid event vocabulary (`connect_document`, `submitOp`, `op`,
   `signal`, `nack`, summaries, close, ...) in `dewdrop/events`.
 - Provides top-level encoders for common client frames and a decoder for inbound
@@ -36,12 +37,11 @@ Fluid event packets are Socket.IO event frames:
 42["submitOp", clientId, messages]
 ```
 
-`dewdrop/frame` keeps that shape explicit. It encodes an event name followed by
-ordered JSON arguments, and decodes inbound `42[...]` packets into an event name
-plus dynamic positional args for callers to decode with their own schema.
-
-`dewdrop/frame` also exposes heartbeat packet constants: `2` for ping and `3`
-for pong.
+`windsock` keeps that shape explicit. It encodes an event name followed by
+ordered JSON arguments, decodes inbound `42[...]` packets into an event name plus
+dynamic positional args, and exposes heartbeat packet constants: `2` for ping and
+`3` for pong. dewdrop layers Fluid event names and aquamarine/beryl adapters on
+top of that raw framing package.
 
 ## Event vocabulary
 
@@ -66,8 +66,7 @@ knows about:
 `dewdrop/server.server_codec()` exposes a `beryl/wire/codec.Codec` for Fluid
 Socket.IO text frames. It decodes `connect_document` as a beryl join, derives a
 `document:<tenant>:<doc>` topic from the connect payload when possible, handles
-heartbeat ping packets, and encodes Fluid replies and pushes through
-`dewdrop/frame`.
+heartbeat ping packets, and encodes Fluid replies and pushes through `windsock`.
 
 ```gleam
 import beryl
@@ -103,5 +102,5 @@ frame:
 [join_ref, ref, topic, event, payload]
 ```
 
-That difference is why dewdrop owns Fluid's Socket.IO shape directly instead of
+That difference is why dewdrop uses `windsock` for Socket.IO framing instead of
 reusing the Phoenix codec shape from roost.
