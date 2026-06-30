@@ -14,8 +14,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - otp-version: "26"
-            erlang-version: "26.2.5.21"
           - otp-version: "27"
             erlang-version: "27.3.4.13"
           - otp-version: "28"
