@@ -4,7 +4,7 @@ import '../styles/global.css';
 
 const events = [
   { name: 'connect_document', direction: 'client -> server', purpose: 'Begin collaboration for a document.' },
-  { name: 'connect_document_success', direction: 'server -> client', purpose: 'Acknowledge a successful join and carry the reply reference.' },
+  { name: 'connect_document_success', direction: 'server -> client', purpose: 'Acknowledge a successful document connection.' },
   { name: 'connect_document_error', direction: 'server -> client', purpose: 'Reject a document connection attempt.' },
   { name: 'submitOp', direction: 'client -> server', purpose: 'Submit operation messages for sequencing.' },
   { name: 'submitSignal', direction: 'client -> server', purpose: 'Send non-persistent collaboration signals.' },
@@ -21,13 +21,13 @@ const packageContents = [
   ['dewdrop/frame', 'Low-level Socket.IO event encoder/decoder for `42["event", ...args]`, plus ping/pong packet constants.'],
   ['dewdrop/events', 'Dependency-light Fluid event constants that protocol packages can import directly.'],
   ['dewdrop', 'Top-level helpers for common frames such as `connect_document`, `submitOp`, `submitSignal`, and inbound decode.'],
-  ['dewdrop/server', 'A beryl server codec that decodes Fluid Socket.IO text frames and emits Fluid replies or pushes from server tests.']
+  ['dewdrop/server', 'A beryl server codec that decodes Fluid Socket.IO text frames and emits Fluid replies or pushes for beryl-based tests and servers.']
 ];
 
 const examples = [
   {
     id: 'install-example',
-    title: 'Add the pre-1.0 dependency',
+    title: 'Add the git dependency',
     note: 'Until Hex publishing, pin the Git dependency explicitly.',
     language: 'toml',
     code: `[dependencies]
@@ -70,7 +70,7 @@ pub fn event_name() {
   {
     id: 'server-example',
     title: 'Use the server codec',
-    note: 'beryl is the server runtime dependency behind `dewdrop/server`.',
+    note: 'beryl is used by `dewdrop/server` to adapt Fluid frames to beryl’s server codec interface.',
     language: 'gleam',
     code: `import beryl
 import dewdrop/server
@@ -113,7 +113,7 @@ pub fn config() {
         <div class="hero-copy">
           <p class="context-line">Fluid Framework protocol codec for Gleam</p>
           <h1>Canonical Fluid Socket.IO frames for Gleam.</h1>
-          <p class="hero-lede">dewdrop gives Gleam projects a precise Fluid wire vocabulary: event packets, positional arguments, heartbeat packets, event constants, and a server codec for beryl.</p>
+          <p class="hero-lede">dewdrop gives Gleam projects a precise Fluid wire vocabulary: event packets, positional arguments, heartbeat packets, event constants, and a beryl server codec.</p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="#quickstart">See the package</a>
             <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source ↗</a>
@@ -142,7 +142,7 @@ pub fn config() {
           <ol class="state-line" aria-label="Frame lifecycle">
             <li>encoded</li>
             <li>decoded</li>
-            <li>replied</li>
+            <li>response encoded</li>
           </ol>
         </div>
       </section>
@@ -150,7 +150,7 @@ pub fn config() {
       <section class="section shell" id="quickstart" aria-labelledby="quickstart-title">
         <div class="section-heading">
           <h2 id="quickstart-title">What the package provides.</h2>
-          <p>Install the pre-1.0 package, encode and decode Fluid event packets, import the event vocabulary, and use the beryl server codec when tests need to speak the same wire shape.</p>
+          <p>Add the pre-1.0 git dependency, encode and decode Fluid event packets, import the event vocabulary, and use the beryl server codec when tests need to speak the same wire shape.</p>
         </div>
         <div class="package-grid" aria-label="Gleam package examples">
           {examples.map((example) => (
@@ -167,7 +167,7 @@ pub fn config() {
         </div>
         <aside class="boundary-note" aria-label="beryl dependency role">
           <h3>Why beryl is a dependency</h3>
-          <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets a beryl server test decode Fluid Socket.IO text frames, derive a document topic from <code>connect_document</code>, and encode Fluid replies or pushes with the same <code>dewdrop/frame</code> wire format.</p>
+          <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets beryl-based tests or servers decode Fluid Socket.IO text frames, derive a document topic from <code>connect_document</code>, and encode Fluid replies or pushes with the same <code>dewdrop/frame</code> wire format.</p>
         </aside>
       </section>
 
@@ -185,7 +185,7 @@ pub fn config() {
           <article role="listitem">
             <h3>Heartbeat packet</h3>
             <code>2</code>
-            <p><code>dewdrop/frame</code> exposes ping and pong packet constants so clients and server tests can handle heartbeats outside event decoding.</p>
+            <p><code>dewdrop/frame</code> exposes ping and pong packet constants so callers and server tests can handle heartbeats outside event decoding.</p>
           </article>
         </div>
       </section>
