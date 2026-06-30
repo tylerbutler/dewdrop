@@ -1,3 +1,4 @@
+# Tool versions are defined in .tool-versions (asdf-compatible format),
+# which mise reads automatically.
 [tools]
-erlang = "latest"
-gleam = "1.16"
+node = "24"
