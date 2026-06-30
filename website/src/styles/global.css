@@ -1,3 +1,10 @@
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
 :root {
   color-scheme: light;
   --ink: oklch(18% 0.045 205);
@@ -24,9 +31,13 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4.5rem;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-sans);
   font-kerning: normal;
+  font-feature-settings: "liga" 1, "calt" 1;
 }
+
 
 * { box-sizing: border-box; }
 
@@ -51,8 +62,9 @@ body { overflow-x: clip; }
 p, h1, h2, h3 { overflow-wrap: anywhere; }
 
 code, pre {
-  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
-  font-variant-ligatures: none;
+  font-family: var(--font-mono);
+  font-variant-ligatures: common-ligatures contextual;
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
 code {
@@ -356,23 +368,23 @@ h3 {
   color: var(--ink-soft);
 }
 
-.copy-button {
-  min-height: 40px;
-  flex: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--primary-dark);
-  padding: 0 var(--space-md);
-  font: inherit;
-  font-weight: 720;
-  cursor: pointer;
-  transition: background-color 160ms ease-out, color 160ms ease-out;
+.package-card .expressive-code {
+  margin: 0;
+  min-width: 0;
 }
 
-.copy-button:hover {
-  background: var(--surface-strong);
-  color: var(--ink);
+.expressive-code code {
+  font-variant-ligatures: common-ligatures contextual;
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+.package-card .expressive-code .frame {
+  border-radius: 0;
+}
+
+.package-card .expressive-code pre {
+  min-height: 100%;
+  border-radius: 0;
 }
 
 pre {
@@ -383,11 +395,6 @@ pre {
   color: var(--code-ink);
   padding: clamp(1rem, 3vw, 1.5rem);
   line-height: 1.7;
-}
-
-.package-card pre {
-  border-radius: 0;
-  min-height: 100%;
 }
 
 .boundary-note {
@@ -558,7 +565,6 @@ pre {
   .nav-links a { padding-inline: var(--space-sm); }
   .hero-actions, .package-header { align-items: stretch; flex-direction: column; }
   .button { width: 100%; }
-  .copy-button { width: fit-content; }
   .state-line { align-items: stretch; flex-direction: column; }
   .state-line li { width: 100%; }
   .stack-item { grid-template-columns: 1fr; gap: var(--space-xs); }

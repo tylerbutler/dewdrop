@@ -1,4 +1,5 @@
 ---
+import { Code } from 'astro-expressive-code/components';
 import '../styles/global.css';
 
 const events = [
@@ -159,9 +160,8 @@ pub fn config() {
                   <h3>{example.title}</h3>
                   <p>{example.note}</p>
                 </div>
-                <button class="copy-button" type="button" data-copy-target={`#${example.id}`}>Copy</button>
               </div>
-              <pre aria-label={`${example.title} ${example.language} example`}><code id={example.id}>{example.code}</code></pre>
+              <Code code={example.code} lang={example.language} title={example.title} />
             </article>
           ))}
         </div>
@@ -240,32 +240,5 @@ pub fn config() {
       <p>MIT licensed. Wire-frame behavior is canonical; the public API may change before 1.0.</p>
       <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">github.com/tylerbutler/dewdrop ↗</a>
     </footer>
-
-    <script>
-      const copyButtons = document.querySelectorAll('[data-copy-target]');
-
-      copyButtons.forEach((button) => {
-        button.addEventListener('click', async () => {
-          const targetSelector = button.getAttribute('data-copy-target');
-          const target = targetSelector ? document.querySelector(targetSelector) : null;
-          const text = target?.textContent;
-
-          if (!text) {
-            button.textContent = 'Unavailable';
-            return;
-          }
-
-          try {
-            await navigator.clipboard.writeText(text);
-            button.textContent = 'Copied';
-            window.setTimeout(() => {
-              button.textContent = 'Copy';
-            }, 1800);
-          } catch {
-            button.textContent = 'Copy failed';
-          }
-        });
-      });
-    </script>
   </body>
 </html>
