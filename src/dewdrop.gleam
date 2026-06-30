@@ -1,7 +1,7 @@
 //// Fluid Framework protocol codec — the Fluid analogue of `roost`.
 ////
-//// dewdrop owns the canonical Fluid (Socket.IO) wire frame in `dewdrop/frame`
-//// and the event vocabulary below. It pairs with
+//// dewdrop owns the canonical Fluid event vocabulary and maps it onto the
+//// Socket.IO frame primitives from `windsock`. It pairs with
 //// [aquamarine](https://github.com/tylerbutler/aquamarine) as a pluggable
 //// codec, the same way `roost` backs `aquamarine/phoenix`.
 ////
@@ -14,11 +14,11 @@
 
 import aquamarine/codec as aquamarine_codec
 import dewdrop/events
-import dewdrop/frame
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode as dynamic_decode
 import gleam/json
 import gleam/option.{type Option, None, Some}
+import windsock
 
 /// Event-name vocabulary lives in `dewdrop/events` so importers can use the
 /// names without depending on aquamarine or beryl. Re-exported here for
@@ -58,12 +58,12 @@ pub fn codec() -> aquamarine_codec.Codec {
 
 /// Encode a `connect_document` frame.
 pub fn encode_connect(payload: json.Json) -> String {
-  frame.encode(connect_document, [payload])
+  windsock.encode(connect_document, [payload])
 }
 
 /// Encode a `submitOp` frame: `submitOp(client_id, messages)`.
 pub fn encode_submit_op(client_id: json.Json, messages: json.Json) -> String {
-  frame.encode(submit_op, [client_id, messages])
+  windsock.encode(submit_op, [client_id, messages])
 }
 
 /// Encode a `submitSignal` frame: `submitSignal(client_id, signals)`.
@@ -71,12 +71,12 @@ pub fn encode_submit_signal(
   client_id: json.Json,
   signals: json.Json,
 ) -> String {
-  frame.encode(submit_signal, [client_id, signals])
+  windsock.encode(submit_signal, [client_id, signals])
 }
 
 /// Decode an inbound Fluid event frame.
-pub fn decode(text: String) -> Result(frame.Incoming, frame.DecodeError) {
-  frame.decode(text)
+pub fn decode(text: String) -> Result(windsock.Incoming, windsock.DecodeError) {
+  windsock.decode(text)
 }
 
 fn decode_aquamarine(
@@ -97,7 +97,7 @@ fn decode_aquamarine(
 
 fn encode_join(join_ref: String, topic: String, payload: json.Json) -> String {
   let _ = topic
-  frame.encode(connect_document, [json.string(join_ref), payload])
+  windsock.encode(connect_document, [json.string(join_ref), payload])
 }
 
 fn encode_push(
@@ -110,18 +110,18 @@ fn encode_push(
   let _ = join_ref
   let _ = ref
   let _ = topic
-  frame.encode(event, [payload])
+  windsock.encode(event, [payload])
 }
 
 fn encode_heartbeat(ref: String) -> String {
   let _ = ref
-  frame.encode_heartbeat()
+  windsock.encode_heartbeat()
 }
 
-fn decode_error(error: frame.DecodeError) -> aquamarine_codec.DecodeError {
+fn decode_error(error: windsock.DecodeError) -> aquamarine_codec.DecodeError {
   case error {
-    frame.InvalidJson(reason) -> aquamarine_codec.InvalidJson(reason)
-    frame.InvalidFormat(reason) -> aquamarine_codec.InvalidFormat(reason)
+    windsock.InvalidJson(reason) -> aquamarine_codec.InvalidJson(reason)
+    windsock.InvalidFormat(reason) -> aquamarine_codec.InvalidFormat(reason)
   }
 }
 

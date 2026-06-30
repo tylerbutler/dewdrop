@@ -2,7 +2,7 @@
 ////
 //// Peer to `dewdrop.codec()` (the aquamarine *client* codec): this exposes a
 //// `beryl/wire/codec.Codec` so a beryl server speaks the canonical Fluid
-//// `42[...]` frame owned by `dewdrop/frame`. Pass it to `beryl.config`.
+//// `42[...]` frame provided by `windsock`. Pass it to `beryl.config`.
 ////
 //// ```gleam
 //// beryl.config(dewdrop/server.server_codec())
@@ -21,13 +21,13 @@ import beryl/wire/codec.{
   StatusError, StatusOk, TextFrame,
 }
 import dewdrop/events
-import dewdrop/frame
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/option.{None}
+import windsock
 
-/// Build a Fluid server `Codec` for beryl. Pair with `dewdrop/frame` framing.
+/// Build a Fluid server `Codec` for beryl. Pair with `windsock` framing.
 pub fn server_codec() -> Codec {
   Codec(
     decode_text: decode_text,
@@ -40,17 +40,17 @@ pub fn server_codec() -> Codec {
 
 fn decode_text(text: String) -> Result(Inbound, DecodeError) {
   case text {
-    t if t == frame.ping -> Ok(heartbeat_inbound())
+    t if t == windsock.ping -> Ok(heartbeat_inbound())
     _ ->
-      case frame.decode(text) {
+      case windsock.decode(text) {
         Ok(incoming) -> Ok(to_inbound(incoming))
-        Error(frame.InvalidJson(reason)) -> Error(InvalidJson(reason))
-        Error(frame.InvalidFormat(reason)) -> Error(InvalidFormat(reason))
+        Error(windsock.InvalidJson(reason)) -> Error(InvalidJson(reason))
+        Error(windsock.InvalidFormat(reason)) -> Error(InvalidFormat(reason))
       }
   }
 }
 
-fn to_inbound(incoming: frame.Incoming) -> Inbound {
+fn to_inbound(incoming: windsock.Incoming) -> Inbound {
   let payload = first_arg(incoming.args)
   let kind = case incoming.event {
     e if e == events.connect_document -> Join
@@ -79,8 +79,7 @@ fn heartbeat_inbound() -> Inbound {
 fn topic_from_payload(payload: Dynamic) -> String {
   let tenant =
     field_string(payload, "tenantId", field_string(payload, "tenant", ""))
-  let doc =
-    field_string(payload, "documentId", field_string(payload, "id", ""))
+  let doc = field_string(payload, "documentId", field_string(payload, "id", ""))
   case tenant, doc {
     "", _ -> ""
     _, "" -> ""
@@ -110,15 +109,17 @@ fn encode_reply(
   payload: Json,
 ) -> Frame {
   case status {
-    StatusOk -> TextFrame(frame.encode(events.connect_document_success, [payload]))
-    StatusError -> TextFrame(frame.encode(events.connect_document_error, [payload]))
+    StatusOk ->
+      TextFrame(windsock.encode(events.connect_document_success, [payload]))
+    StatusError ->
+      TextFrame(windsock.encode(events.connect_document_error, [payload]))
   }
 }
 
 fn encode_push(_topic: String, event: String, payload: Json) -> Frame {
-  TextFrame(frame.encode(event, [payload]))
+  TextFrame(windsock.encode(event, [payload]))
 }
 
 fn encode_heartbeat_reply(_ref: option.Option(String)) -> Frame {
-  TextFrame(frame.pong)
+  TextFrame(windsock.pong)
 }

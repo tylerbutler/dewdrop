@@ -9,6 +9,7 @@ target = "erlang"
 [dependencies]
 gleam_stdlib = ">= 0.48.0 and < 2.0.0"
 gleam_json = ">= 3.0.0 and < 4.0.0"
+windsock = { git = "https://github.com/tylerbutler/windsock", ref = "main" }
 aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "main" }
 beryl = { path = "../beryl" }
 
