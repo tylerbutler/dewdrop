@@ -26,7 +26,7 @@ jobs:
 
       - name: Write BEAM tool versions
         run: |
-          printf 'erlang %s\ngleam 1.16.0\nrebar 3\n' '${{ matrix.erlang-version }}' > .tool-versions
+          printf 'erlang %s\ngleam 1.16.0\nrebar 3.27.0\n' '${{ matrix.erlang-version }}' > .tool-versions
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
@@ -51,7 +51,7 @@ jobs:
 
       - name: Write BEAM tool versions
         run: |
-          printf 'erlang 27.3.4.13\ngleam 1.16.0\nrebar 3\n' > .tool-versions
+          printf 'erlang 27.3.4.13\ngleam 1.16.0\nrebar 3.27.0\n' > .tool-versions
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
