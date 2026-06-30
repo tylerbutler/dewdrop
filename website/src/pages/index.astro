@@ -3,18 +3,18 @@ import { Code } from 'astro-expressive-code/components';
 import '../styles/global.css';
 
 const events = [
-  { name: 'connect_document', direction: 'client -> server', purpose: 'Begin collaboration for a document.' },
-  { name: 'connect_document_success', direction: 'server -> client', purpose: 'Acknowledge a successful document connection.' },
-  { name: 'connect_document_error', direction: 'server -> client', purpose: 'Reject a document connection attempt.' },
-  { name: 'submitOp', direction: 'client -> server', purpose: 'Submit operation messages for sequencing.' },
-  { name: 'submitSignal', direction: 'client -> server', purpose: 'Send non-persistent collaboration signals.' },
-  { name: 'op', direction: 'server -> client', purpose: 'Deliver sequenced operations back to clients.' },
-  { name: 'signal', direction: 'server -> client', purpose: 'Broadcast non-persistent collaboration signals.' },
-  { name: 'nack', direction: 'server -> client', purpose: 'Reject submitted operations explicitly.' },
+  { name: 'connect_document', direction: 'client → server', purpose: 'Begin collaboration for a document.' },
+  { name: 'connect_document_success', direction: 'server → client', purpose: 'Acknowledge a successful document connection.' },
+  { name: 'connect_document_error', direction: 'server → client', purpose: 'Reject a document connection attempt.' },
+  { name: 'submitOp', direction: 'client → server', purpose: 'Submit operation messages for sequencing.' },
+  { name: 'submitSignal', direction: 'client → server', purpose: 'Send non-persistent collaboration signals.' },
+  { name: 'op', direction: 'server → client', purpose: 'Deliver sequenced operations back to clients.' },
+  { name: 'signal', direction: 'server → client', purpose: 'Broadcast non-persistent collaboration signals.' },
+  { name: 'nack', direction: 'server → client', purpose: 'Reject submitted operations explicitly.' },
   { name: 'close', direction: 'either', purpose: 'Close the document connection.' },
-  { name: 'submitSummary', direction: 'client -> server', purpose: 'Submit a summary for the document.' },
-  { name: 'summaryAck', direction: 'server -> client', purpose: 'Acknowledge an accepted summary.' },
-  { name: 'summaryNack', direction: 'server -> client', purpose: 'Reject a submitted summary.' }
+  { name: 'submitSummary', direction: 'client → server', purpose: 'Submit a summary for the document.' },
+  { name: 'summaryAck', direction: 'server → client', purpose: 'Acknowledge an accepted summary.' },
+  { name: 'summaryNack', direction: 'server → client', purpose: 'Reject a submitted summary.' }
 ];
 
 const layers = [
@@ -113,7 +113,7 @@ pub fn codec() {
           <h1>Fluid event vocabulary, with adapters at the edge.</h1>
           <p class="hero-lede">dewdrop sits above raw Socket.IO frames and below the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow codec boundary.</p>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="#quickstart">Inspect the boundary</a>
+            <a class="button primary" href="#quickstart">Get started</a>
             <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source -></a>
           </div>
         </div>
@@ -190,29 +190,33 @@ pub fn codec() {
           <h2 id="events-title">Complete Fluid event vocabulary, ready to import.</h2>
           <p>The constants live in <code>dewdrop/events</code> so protocol packages can share names without pulling in a client or server runtime.</p>
         </div>
-        <div class="event-table" role="table" aria-label="Fluid event vocabulary">
-          <div class="event-row header" role="row">
-            <span role="columnheader">Event</span>
-            <span role="columnheader">Direction</span>
-            <span role="columnheader">Purpose</span>
-          </div>
-          {events.map((event) => (
-            <div class="event-row" role="row">
-              <div class="event-cell" role="cell">
-                <span class="cell-label">Event</span>
-                <code>{event.name}</code>
-              </div>
-              <div class="event-cell" role="cell">
-                <span class="cell-label">Direction</span>
-                <span>{event.direction}</span>
-              </div>
-              <div class="event-cell" role="cell">
-                <span class="cell-label">Purpose</span>
-                <span>{event.purpose}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        <table class="event-table" role="table" aria-label="Fluid event vocabulary">
+          <thead>
+            <tr class="event-row header" role="row">
+              <th scope="col" role="columnheader">Event</th>
+              <th scope="col" role="columnheader">Direction</th>
+              <th scope="col" role="columnheader">Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr class="event-row" role="row">
+                <td class="event-cell" role="cell">
+                  <span class="cell-label">Event</span>
+                  <code>{event.name}</code>
+                </td>
+                <td class="event-cell" role="cell">
+                  <span class="cell-label">Direction</span>
+                  <span>{event.direction}</span>
+                </td>
+                <td class="event-cell" role="cell">
+                  <span class="cell-label">Purpose</span>
+                  <span>{event.purpose}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
     </main>
 

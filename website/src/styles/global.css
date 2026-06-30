@@ -50,9 +50,7 @@ body {
   margin: 0;
   overflow-x: clip;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 80% 6%, color-mix(in oklch, var(--accent) 32%, transparent), transparent 25rem),
-    linear-gradient(180deg, oklch(97% 0.014 182), var(--surface) 38rem);
+  background: linear-gradient(180deg, oklch(97% 0.014 182), var(--surface) 38rem);
   font-size: 1rem;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -129,7 +127,7 @@ pre code { white-space: pre; }
 .brand {
   gap: var(--space-sm);
   text-decoration: none;
-  font-weight: 760;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -149,7 +147,7 @@ pre code { white-space: pre; }
   padding: 0 var(--space-md);
   color: var(--ink-soft);
   text-decoration: none;
-  font-weight: 620;
+  font-weight: 500;
 }
 
 .nav-links a:hover {
@@ -171,7 +169,7 @@ pre code { white-space: pre; }
 .context-line {
   margin: 0 0 var(--space-lg);
   color: var(--primary-dark);
-  font-weight: 760;
+  font-weight: 600;
 }
 
 h1,
@@ -230,7 +228,7 @@ h3 {
   justify-content: center;
   border-radius: 999px;
   padding: 0.85rem 1.15rem;
-  font-weight: 720;
+  font-weight: 600;
   text-decoration: none;
   transition: transform 160ms ease-out, background-color 160ms ease-out, color 160ms ease-out;
 }
@@ -271,7 +269,7 @@ h3 {
 .panel-topline span {
   color: var(--accent-soft);
   font-size: 0.875rem;
-  font-weight: 720;
+  font-weight: 600;
 }
 
 .panel-topline code {
@@ -301,7 +299,7 @@ h3 {
 .frame-map dt {
   margin-block-end: var(--space-2xs);
   color: white;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .frame-map dd {
@@ -334,7 +332,7 @@ h3 {
   color: var(--accent-soft);
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.875rem;
-  font-weight: 720;
+  font-weight: 600;
 }
 
 .state-line li::before {
@@ -435,7 +433,7 @@ pre {
 .adapter-strip code,
 .layer-card span {
   color: var(--primary-dark);
-  font-weight: 680;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -504,10 +502,21 @@ pre {
 
 .event-table {
   display: grid;
+  width: 100%;
   border: 1px solid var(--border);
+  border-collapse: collapse;
   border-radius: 16px;
   overflow: hidden;
   background: oklch(99% 0.004 182);
+}
+
+.event-table thead,
+.event-table tbody {
+  display: contents;
+}
+
+.event-row th {
+  text-align: start;
 }
 
 .event-row {
@@ -524,7 +533,7 @@ pre {
 .event-row.header {
   background: var(--primary-dark);
   color: white;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .event-cell {
@@ -535,18 +544,18 @@ pre {
 
 .event-row code {
   color: var(--primary-dark);
-  font-weight: 720;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.event-row.header span { color: white; }
+.event-row.header th { color: white; }
 .event-cell span:not(.cell-label) { color: var(--ink-soft); }
 
 .cell-label {
   display: none;
   color: var(--primary-dark);
   font-size: 0.78rem;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .footer {
@@ -560,7 +569,7 @@ pre {
 }
 
 .footer p { margin: 0; }
-.footer a { color: var(--primary-dark); font-weight: 680; }
+.footer a { color: var(--primary-dark); font-weight: 600; }
 
 @media (max-width: 920px) {
   .package-grid { grid-template-columns: 1fr; }
