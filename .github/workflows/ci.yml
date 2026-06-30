@@ -18,11 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
 
+      - name: Write BEAM tool versions
+        run: |
+          printf 'erlang %s\ngleam 1.16.0\nrebar 3\n' '${{ matrix.otp-version }}' > .tool-versions
+
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
-        with:
-          erlang-version: ${{ matrix.otp-version }}
-          gleam-version: "1.16.0"
 
       - name: Check formatting
         run: just format-check
@@ -42,11 +43,12 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
 
+      - name: Write BEAM tool versions
+        run: |
+          printf 'erlang 27\ngleam 1.16.0\nrebar 3\n' > .tool-versions
+
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
-        with:
-          erlang-version: "27"
-          gleam-version: "1.16.0"
 
       - name: Build documentation
         run: just docs
