@@ -27,6 +27,7 @@ const layers = [
 const examples = [
   {
     id: 'install-example',
+    step: 1,
     title: 'Add the git dependency',
     note: 'Until Hex publishing, pin the Git dependency explicitly.',
     language: 'toml',
@@ -35,6 +36,7 @@ dewdrop = { git = "https://github.com/tylerbutler/dewdrop", ref = "main" }`
   },
   {
     id: 'encode-example',
+    step: 2,
     title: 'Encode an event packet',
     note: 'The event name and every argument stay positional.',
     language: 'gleam',
@@ -51,6 +53,7 @@ pub fn connect_frame() {
   },
   {
     id: 'submit-example',
+    step: 3,
     title: 'Submit operations',
     note: 'Operation messages stay in the ordered argument list.',
     language: 'gleam',
@@ -68,6 +71,7 @@ pub fn submit_frame() {
   },
   {
     id: 'server-example',
+    step: 4,
     title: 'Use the server codec',
     note: 'beryl can decode and encode the same Fluid event stream.',
     language: 'gleam',
@@ -101,7 +105,7 @@ pub fn codec() {
           <a href="#quickstart">Quickstart</a>
           <a href="#layers">Layers</a>
           <a href="#events">Events</a>
-          <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer" aria-label="Open dewdrop source on GitHub in a new tab">GitHub -></a>
+          <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer" aria-label="Open dewdrop source on GitHub in a new tab">GitHub →</a>
         </div>
       </nav>
     </header>
@@ -110,11 +114,11 @@ pub fn codec() {
       <section class="hero shell" id="top">
         <div class="hero-copy">
           <p class="context-line">Fluid protocol surface for Gleam</p>
-          <h1>Fluid event vocabulary, with adapters at the edge.</h1>
+          <h1>Fluid event vocabulary, decoded from raw Socket.IO frames.</h1>
           <p class="hero-lede">dewdrop sits above raw Socket.IO frames and below the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow codec boundary.</p>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="#quickstart">Get started</a>
-            <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source -></a>
+            <a class="button primary" href="#install-example">Install from git</a>
+            <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source →</a>
           </div>
         </div>
 
@@ -150,19 +154,22 @@ pub fn codec() {
           <h2 id="quickstart-title">Small API, exact output.</h2>
           <p>Add the pre-1.0 git dependency, encode and decode Fluid event packets, import the event vocabulary, and use the beryl server codec when tests need to speak the same wire shape.</p>
         </div>
-        <div class="package-grid" aria-label="Gleam package examples">
+        <ol class="package-grid" aria-label="Gleam package examples, in order">
           {examples.map((example) => (
-            <article class="package-card">
-              <div class="package-header">
-                <div>
-                  <h3>{example.title}</h3>
-                  <p>{example.note}</p>
+            <li class={`package-card ${example.step === 1 ? 'primary' : ''}`} id={example.step === 1 ? example.id : undefined}>
+              <article>
+                <div class="package-header">
+                  <span class="step-number">{example.step}</span>
+                  <div>
+                    <h3>{example.title}</h3>
+                    <p>{example.note}</p>
+                  </div>
                 </div>
-              </div>
-              <Code code={example.code} lang={example.language} title={example.title} />
-            </article>
+                <Code code={example.code} lang={example.language} title={example.title} />
+              </article>
+            </li>
           ))}
-        </div>
+        </ol>
         <aside class="boundary-note" aria-label="beryl dependency role">
           <h3>Why beryl is a dependency</h3>
           <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets beryl-based tests or servers decode Fluid Socket.IO text frames, derive a document topic from <code>connect_document</code>, and encode Fluid replies or pushes with <code>windsock</code>.</p>
@@ -190,39 +197,32 @@ pub fn codec() {
           <h2 id="events-title">Complete Fluid event vocabulary, ready to import.</h2>
           <p>The constants live in <code>dewdrop/events</code> so protocol packages can share names without pulling in a client or server runtime.</p>
         </div>
-        <table class="event-table" role="table" aria-label="Fluid event vocabulary">
-          <thead>
-            <tr class="event-row header" role="row">
-              <th scope="col" role="columnheader">Event</th>
-              <th scope="col" role="columnheader">Direction</th>
-              <th scope="col" role="columnheader">Purpose</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((event) => (
-              <tr class="event-row" role="row">
-                <td class="event-cell" role="cell">
-                  <span class="cell-label">Event</span>
-                  <code>{event.name}</code>
-                </td>
-                <td class="event-cell" role="cell">
-                  <span class="cell-label">Direction</span>
-                  <span>{event.direction}</span>
-                </td>
-                <td class="event-cell" role="cell">
-                  <span class="cell-label">Purpose</span>
-                  <span>{event.purpose}</span>
-                </td>
+        <div class="event-table-wrap">
+          <table class="event-table" aria-label="Fluid event vocabulary">
+            <thead>
+              <tr class="event-row header">
+                <th scope="col">Event</th>
+                <th scope="col">Direction</th>
+                <th scope="col">Purpose</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {events.map((event) => (
+                <tr>
+                  <td><code>{event.name}</code></td>
+                  <td>{event.direction}</td>
+                  <td>{event.purpose}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
 
     <footer class="footer shell">
-      <p>MIT licensed. Wire-frame behavior is canonical; the public API may change before 1.0.</p>
-      <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">github.com/tylerbutler/dewdrop -></a>
+      <p>MIT licensed. The public Gleam API may refine before 1.0, but the Fluid wire frames are canonical and safe to build on.</p>
+      <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">github.com/tylerbutler/dewdrop →</a>
     </footer>
   </body>
 </html>
