@@ -256,6 +256,37 @@ h3 {
   flex-wrap: wrap;
 }
 
+.boundary-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin: var(--space-xl) 0 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--border);
+}
+
+.boundary-strip div {
+  min-width: 0;
+  background: oklch(99% 0.006 219 / 0.84);
+  padding: var(--space-md);
+}
+
+.boundary-strip dt,
+.compat-list dt,
+.event-group-row th {
+  color: var(--primary-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.boundary-strip dd,
+.compat-list dd {
+  margin: var(--space-2xs) 0 0;
+  color: var(--ink-soft);
+}
+
 .button {
   min-height: 48px;
   display: inline-flex;
@@ -389,31 +420,44 @@ h3 {
 
 .section-heading.compact { max-width: 700px; }
 
-.package-grid {
+.reference-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(320px, 1fr);
+  gap: var(--space-xl);
+  align-items: end;
+  max-width: none;
+}
+
+.reference-heading p {
+  max-width: 65ch;
+  margin: 0;
+}
+
+.reference-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--border);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.package-card {
+.reference-card {
   min-width: 0;
 }
 
-.package-card article {
+.reference-card article {
   display: grid;
-  grid-template-rows: auto 1fr;
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  grid-template-columns: minmax(16rem, 0.42fr) minmax(0, 1fr);
   background: oklch(99% 0.006 219);
-  overflow: hidden;
 }
 
-.package-card.primary article {
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 1px var(--primary);
+.reference-card.primary article {
+  background: linear-gradient(90deg, oklch(97% 0.024 214), oklch(99% 0.006 219) 42%);
 }
 
 .step-number {
@@ -430,7 +474,7 @@ h3 {
   font-weight: 600;
 }
 
-.package-card.primary .step-number {
+.reference-card.primary .step-number {
   background: var(--primary);
   color: var(--primary-ink);
 }
@@ -449,9 +493,10 @@ h3 {
   color: var(--ink-soft);
 }
 
-.package-card .expressive-code {
+.reference-card .expressive-code {
   margin: 0;
   min-width: 0;
+  border-inline-start: 1px solid var(--border);
 }
 
 .expressive-code code {
@@ -459,11 +504,11 @@ h3 {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 
-.package-card .expressive-code .frame {
+.reference-card .expressive-code .frame {
   border-radius: 0;
 }
 
-.package-card .expressive-code pre {
+.reference-card .expressive-code pre {
   min-height: 100%;
   border-radius: 0;
 }
@@ -479,6 +524,10 @@ pre {
 }
 
 .boundary-note {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.84fr);
+  gap: var(--space-xl);
+  align-items: start;
   margin-block-start: var(--space-lg);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -490,6 +539,13 @@ pre {
   max-width: 78ch;
   margin: 0;
   color: var(--ink-soft);
+}
+
+.compat-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-md);
+  margin: 0;
 }
 
 .boundary-note code,
@@ -572,6 +628,16 @@ pre {
 
 .event-table tbody tr:first-child td { border-block-start: 0; }
 
+.event-group-row th {
+  padding: var(--space-sm) var(--space-lg);
+  border-block-start: 1px solid var(--border);
+  background: var(--surface-strong);
+  text-align: start;
+  letter-spacing: 0.01em;
+}
+
+.event-table tbody tr:first-child th { border-block-start: 0; }
+
 .event-row.header th {
   background: var(--primary-dark);
   color: white;
@@ -607,6 +673,8 @@ pre {
 }
 
 @media (max-width: 820px) {
+  html { scroll-padding-top: 9.5rem; }
+
   .nav {
     align-items: flex-start;
     flex-direction: column;
@@ -615,19 +683,32 @@ pre {
 
   .nav-links { justify-content: flex-start; }
 
-  .hero {
+  .hero,
+  .reference-heading,
+  .reference-card article,
+  .boundary-note {
     grid-template-columns: 1fr;
   }
 
   .hero { min-height: auto; }
   h1 { max-width: 12ch; }
   .logo-plate { width: 100%; }
+
+  .reference-card .expressive-code {
+    border-block-start: 1px solid var(--border);
+    border-inline-start: 0;
+  }
 }
 
 @media (max-width: 560px) {
   :root { --shell: min(100vw - 28px, 1120px); }
+  html { scroll-padding-top: 11.5rem; }
   .nav-links a { padding-inline: var(--space-sm); }
   .hero-actions, .package-header { align-items: stretch; flex-direction: column; }
+  .boundary-strip,
+  .compat-list {
+    grid-template-columns: 1fr;
+  }
   .button { width: 100%; }
   .state-line { align-items: stretch; flex-direction: column; }
   .state-line li { width: 100%; }

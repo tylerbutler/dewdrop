@@ -2,19 +2,46 @@
 import { Code } from 'astro-expressive-code/components';
 import '../styles/global.css';
 
-const events = [
-  { name: 'connect_document', direction: 'client → server', purpose: 'Begin collaboration for a document.' },
-  { name: 'connect_document_success', direction: 'server → client', purpose: 'Acknowledge a successful document connection.' },
-  { name: 'connect_document_error', direction: 'server → client', purpose: 'Reject a document connection attempt.' },
-  { name: 'submitOp', direction: 'client → server', purpose: 'Submit operation messages for sequencing.' },
-  { name: 'submitSignal', direction: 'client → server', purpose: 'Send non-persistent collaboration signals.' },
-  { name: 'op', direction: 'server → client', purpose: 'Deliver sequenced operations back to clients.' },
-  { name: 'signal', direction: 'server → client', purpose: 'Broadcast non-persistent collaboration signals.' },
-  { name: 'nack', direction: 'server → client', purpose: 'Reject submitted operations explicitly.' },
-  { name: 'close', direction: 'either', purpose: 'Close the document connection.' },
-  { name: 'submitSummary', direction: 'client → server', purpose: 'Submit a summary for the document.' },
-  { name: 'summaryAck', direction: 'server → client', purpose: 'Acknowledge an accepted summary.' },
-  { name: 'summaryNack', direction: 'server → client', purpose: 'Reject a submitted summary.' }
+const eventGroups = [
+  {
+    group: 'Connection',
+    events: [
+      { name: 'connect_document', direction: 'client → server', purpose: 'Begin collaboration for a document.' },
+      { name: 'connect_document_success', direction: 'server → client', purpose: 'Acknowledge a successful document connection.' },
+      { name: 'connect_document_error', direction: 'server → client', purpose: 'Reject a document connection attempt.' },
+      { name: 'close', direction: 'either', purpose: 'Close the document connection.' }
+    ]
+  },
+  {
+    group: 'Operations',
+    events: [
+      { name: 'submitOp', direction: 'client → server', purpose: 'Submit operation messages for sequencing.' },
+      { name: 'op', direction: 'server → client', purpose: 'Deliver sequenced operations back to clients.' },
+      { name: 'nack', direction: 'server → client', purpose: 'Reject submitted operations explicitly.' }
+    ]
+  },
+  {
+    group: 'Signals',
+    events: [
+      { name: 'submitSignal', direction: 'client → server', purpose: 'Send non-persistent collaboration signals.' },
+      { name: 'signal', direction: 'server → client', purpose: 'Broadcast non-persistent collaboration signals.' }
+    ]
+  },
+  {
+    group: 'Summaries',
+    events: [
+      { name: 'submitSummary', direction: 'client → server', purpose: 'Submit a summary for the document.' },
+      { name: 'summaryAck', direction: 'server → client', purpose: 'Acknowledge an accepted summary.' },
+      { name: 'summaryNack', direction: 'server → client', purpose: 'Reject a submitted summary.' }
+    ]
+  }
+];
+
+const boundaryFacts = [
+  { label: 'Event names', value: 'dependency-free constants in dewdrop/events' },
+  { label: 'Frame shape', value: 'windsock encodes Socket.IO text frames' },
+  { label: 'Adapters', value: 'aquamarine client codec and beryl server codec' },
+  { label: 'Status', value: 'pre-1.0, API unstable, not published on Hex' }
 ];
 
 const layers = [
@@ -82,6 +109,13 @@ pub fn codec() {
 }`
   }
 ];
+
+const compatibilityFacts = [
+  { label: 'Gleam', value: 'gleam.toml requires >= 1.7.0' },
+  { label: 'Target', value: 'Erlang' },
+  { label: 'CI matrix', value: 'OTP 27 and 28 with Gleam 1.16.0' },
+  { label: 'Publishing', value: 'Git dependency until Hex publishing' }
+];
 ---
 <!doctype html>
 <html lang="en">
@@ -114,12 +148,20 @@ pub fn codec() {
       <section class="hero shell" id="top">
         <div class="hero-copy">
           <p class="context-line">Fluid protocol surface for Gleam</p>
-          <h1>Fluid event vocabulary for Gleam runtimes.</h1>
+          <h1>Canonical Fluid events as Socket.IO frames.</h1>
           <p class="hero-lede">dewdrop sits between windsock's transport primitives and the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow adapter boundary.</p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="#install-example">Install from git</a>
             <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source →</a>
           </div>
+          <dl class="boundary-strip" aria-label="Verified package facts">
+            {boundaryFacts.map((fact) => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div class="hero-art">
@@ -161,13 +203,13 @@ pub fn codec() {
       </section>
 
       <section class="section shell" id="quickstart" aria-labelledby="quickstart-title">
-        <div class="section-heading">
+        <div class="section-heading reference-heading">
           <h2 id="quickstart-title">Small API, exact output.</h2>
           <p>Add the pre-1.0 git dependency, encode and decode Fluid event names through windsock, import the shared vocabulary, and use the beryl server codec when tests need the same adapter boundary.</p>
         </div>
-        <ol class="package-grid" aria-label="Gleam package examples, in order">
+        <ol class="reference-list" aria-label="Gleam package examples, in order">
           {examples.map((example) => (
-            <li class={`package-card ${example.step === 1 ? 'primary' : ''}`} id={example.step === 1 ? example.id : undefined}>
+            <li class={`reference-card ${example.step === 1 ? 'primary' : ''}`} id={example.step === 1 ? example.id : undefined}>
               <article>
                 <div class="package-header">
                   <span class="step-number">{example.step}</span>
@@ -181,9 +223,19 @@ pub fn codec() {
             </li>
           ))}
         </ol>
-        <aside class="boundary-note" aria-label="beryl dependency role">
-          <h3>Why beryl is a dependency</h3>
-          <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets beryl-based tests or servers interpret Fluid events, derive a document topic from <code>connect_document</code>, and send replies or pushes through <code>windsock</code>.</p>
+        <aside class="boundary-note" aria-label="Compatibility and stability">
+          <div>
+            <h3>Compatibility facts, not promises</h3>
+            <p><code>dewdrop</code> is pre-1.0 and not on Hex yet. The public API can change, but the listed Fluid event names live in <code>dewdrop/events</code> as dependency-free constants for downstream packages.</p>
+          </div>
+          <dl class="compat-list">
+            {compatibilityFacts.map((fact) => (
+              <div>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
         </aside>
       </section>
 
@@ -206,7 +258,7 @@ pub fn codec() {
       <section class="section shell" id="events" aria-labelledby="events-title">
         <div class="section-heading">
           <h2 id="events-title">Complete Fluid event vocabulary, ready to import.</h2>
-          <p>The constants live in <code>dewdrop/events</code> so protocol packages can share names without pulling in a client or server runtime.</p>
+          <p>The constants live in <code>dewdrop/events</code> so protocol packages can share names without pulling in aquamarine or beryl. The groups below mirror the collaboration lifecycle instead of forcing you to reconstruct it from one flat list.</p>
         </div>
         <div class="event-table-wrap">
           <table class="event-table" aria-label="Fluid event vocabulary">
@@ -218,12 +270,19 @@ pub fn codec() {
               </tr>
             </thead>
             <tbody>
-              {events.map((event) => (
-                <tr>
-                  <td><code>{event.name}</code></td>
-                  <td>{event.direction}</td>
-                  <td>{event.purpose}</td>
-                </tr>
+              {eventGroups.map((group) => (
+                <>
+                  <tr class="event-group-row">
+                    <th scope="rowgroup" colspan="3">{group.group}</th>
+                  </tr>
+                  {group.events.map((event) => (
+                    <tr>
+                      <td><code>{event.name}</code></td>
+                      <td>{event.direction}</td>
+                      <td>{event.purpose}</td>
+                    </tr>
+                  ))}
+                </>
               ))}
             </tbody>
           </table>
