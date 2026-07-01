@@ -18,9 +18,9 @@ const events = [
 ];
 
 const layers = [
-  { name: 'windsock', role: 'Socket.IO frame primitives', detail: 'Encodes and decodes raw text frames such as 42["event", ...args], plus Engine.IO heartbeat packets.' },
-  { name: 'dewdrop', role: 'Fluid events and adapters', detail: 'Names the Fluid event vocabulary and exposes client/server codec adapters over the windsock frame shape.' },
-  { name: 'spillway', role: 'Raw Fluid protocol model', detail: 'Owns protocol payloads, sequencing, sessions, JWT/auth, and domain types above event transport.' },
+  { name: 'windsock', role: 'Transport framing primitives', detail: 'Owns the lower-level event envelope and heartbeat packets that dewdrop builds on.' },
+  { name: 'dewdrop', role: 'Fluid events and adapters', detail: 'Names the Fluid event vocabulary and exposes client/server adapters over windsock.' },
+  { name: 'spillway', role: 'Fluid protocol semantics', detail: 'Owns typed Fluid messages, sequencing/session rules, summaries, signals, nacks, and JWT validation above the event adapter.' },
   { name: 'levee', role: 'Server runtime target', detail: 'Consumes the protocol layers to run Fluid-compatible collaboration services in Gleam.' }
 ];
 
@@ -37,8 +37,8 @@ dewdrop = { git = "https://github.com/tylerbutler/dewdrop", ref = "main" }`
   {
     id: 'encode-example',
     step: 2,
-    title: 'Encode an event packet',
-    note: 'The event name and every argument stay positional.',
+    title: 'Encode a Fluid event',
+    note: 'Fluid meaning comes from the event name and positional args.',
     language: 'gleam',
     code: `import dewdrop
 import gleam/json
@@ -89,7 +89,7 @@ pub fn codec() {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>dewdrop - Fluid events and adapters for Gleam</title>
-    <meta name="description" content="dewdrop is a Gleam library for Fluid Framework event vocabulary and client/server codec adapters over Socket.IO frames." />
+    <meta name="description" content="dewdrop is a Gleam library for Fluid Framework event vocabulary and client/server adapters over windsock." />
     <link rel="icon" href="/dewdrop-logo.png" type="image/png" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
@@ -114,8 +114,8 @@ pub fn codec() {
       <section class="hero shell" id="top">
         <div class="hero-copy">
           <p class="context-line">Fluid protocol surface for Gleam</p>
-          <h1>Fluid event vocabulary, decoded from raw Socket.IO frames.</h1>
-          <p class="hero-lede">dewdrop sits above raw Socket.IO frames and below the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow codec boundary.</p>
+          <h1>Fluid event vocabulary for Gleam runtimes.</h1>
+          <p class="hero-lede">dewdrop sits between windsock's transport primitives and the full Fluid protocol model. It names the canonical events, keeps their positional payloads visible, and gives client and server runtimes a narrow adapter boundary.</p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="#install-example">Install from git</a>
             <a class="button secondary" href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">View source →</a>
@@ -125,7 +125,7 @@ pub fn codec() {
         <div class="hero-art">
           <div class="logo-plate" aria-label="dewdrop logo">
             <img src="/dewdrop-logo.png" width="445" height="544" alt="" />
-            <p>Fluid events over exact Socket.IO frames.</p>
+            <p>Fluid events over a narrow transport boundary.</p>
           </div>
 
           <div class="protocol-panel" aria-label="Dewdrop package boundary">
@@ -135,12 +135,16 @@ pub fn codec() {
             </div>
             <dl class="frame-map">
               <div>
+                <dt>Transport</dt>
+                <dd><code>windsock</code> owns the raw event envelope.</dd>
+              </div>
+              <div>
                 <dt>Fluid name</dt>
                 <dd><code>connect_document</code> lives in <code>dewdrop/events</code>.</dd>
               </div>
               <div>
-                <dt>Frame shape</dt>
-                <dd><code>windsock</code> owns the raw <code>42[...]</code> packet.</dd>
+                <dt>Fluid payload</dt>
+                <dd><code>dewdrop</code> keeps event arguments positional and explicit.</dd>
               </div>
               <div>
                 <dt>Runtime edge</dt>
@@ -159,7 +163,7 @@ pub fn codec() {
       <section class="section shell" id="quickstart" aria-labelledby="quickstart-title">
         <div class="section-heading">
           <h2 id="quickstart-title">Small API, exact output.</h2>
-          <p>Add the pre-1.0 git dependency, encode and decode Fluid event packets, import the event vocabulary, and use the beryl server codec when tests need to speak the same wire shape.</p>
+          <p>Add the pre-1.0 git dependency, encode and decode Fluid event names through windsock, import the shared vocabulary, and use the beryl server codec when tests need the same adapter boundary.</p>
         </div>
         <ol class="package-grid" aria-label="Gleam package examples, in order">
           {examples.map((example) => (
@@ -179,14 +183,14 @@ pub fn codec() {
         </ol>
         <aside class="boundary-note" aria-label="beryl dependency role">
           <h3>Why beryl is a dependency</h3>
-          <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets beryl-based tests or servers decode Fluid Socket.IO text frames, derive a document topic from <code>connect_document</code>, and encode Fluid replies or pushes with <code>windsock</code>.</p>
+          <p><code>dewdrop/server</code> exposes a <code>beryl/wire/codec.Codec</code>. That lets beryl-based tests or servers interpret Fluid events, derive a document topic from <code>connect_document</code>, and send replies or pushes through <code>windsock</code>.</p>
         </aside>
       </section>
 
       <section class="section shell layer-section" id="layers" aria-labelledby="layers-title">
         <div class="section-heading compact">
           <h2 id="layers-title">The split is a stack, not a bigger package.</h2>
-          <p>Each layer owns one kind of knowledge. Raw frame syntax, Fluid event names, protocol semantics, and server behavior stay separate.</p>
+          <p>Each layer owns one kind of knowledge. Transport envelopes, Fluid event names, protocol semantics, and server behavior stay separate.</p>
         </div>
         <div class="layer-map" role="list" aria-label="Fluid Gleam stack layers">
           {layers.map((layer) => (
@@ -228,7 +232,7 @@ pub fn codec() {
     </main>
 
     <footer class="footer shell">
-      <p>MIT licensed. The public Gleam API may refine before 1.0, but the Fluid wire frames are canonical and safe to build on.</p>
+      <p>MIT licensed. The public Gleam API may refine before 1.0, but the Fluid event vocabulary is canonical and safe to build on.</p>
       <a href="https://github.com/tylerbutler/dewdrop" target="_blank" rel="noreferrer">github.com/tylerbutler/dewdrop →</a>
     </footer>
   </body>
