@@ -90,7 +90,7 @@ pub fn codec() {
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>dewdrop - Fluid events and adapters for Gleam</title>
     <meta name="description" content="dewdrop is a Gleam library for Fluid Framework event vocabulary and client/server codec adapters over Socket.IO frames." />
-    <link rel="icon" href="/dewdrop-icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/dewdrop-logo.png" type="image/png" />
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
@@ -98,7 +98,7 @@ pub fn codec() {
     <header class="site-header" aria-label="Site header">
       <nav class="nav shell" aria-label="Main navigation">
         <a class="brand" href="#top" aria-label="dewdrop home">
-          <img src="/dewdrop-icon.svg" width="40" height="40" alt="" />
+          <img src="/dewdrop-logo.png" width="33" height="40" alt="" />
           <span>dewdrop</span>
         </a>
         <div class="nav-links" aria-label="Page sections">
@@ -122,30 +122,37 @@ pub fn codec() {
           </div>
         </div>
 
-        <div class="protocol-panel" aria-label="Dewdrop package boundary">
-          <div class="panel-topline">
-            <span>dewdrop boundary</span>
-            <code>connect_document(payload) -> 42["connect_document", payload]</code>
+        <div class="hero-art">
+          <div class="logo-plate" aria-label="dewdrop logo">
+            <img src="/dewdrop-logo.png" width="445" height="544" alt="" />
+            <p>Fluid events over exact Socket.IO frames.</p>
           </div>
-          <dl class="frame-map">
-            <div>
-              <dt>Fluid name</dt>
-              <dd><code>connect_document</code> lives in <code>dewdrop/events</code>.</dd>
+
+          <div class="protocol-panel" aria-label="Dewdrop package boundary">
+            <div class="panel-topline">
+              <span>dewdrop boundary</span>
+              <code>connect_document(payload) -> 42["connect_document", payload]</code>
             </div>
-            <div>
-              <dt>Frame shape</dt>
-              <dd><code>windsock</code> owns the raw <code>42[...]</code> packet.</dd>
-            </div>
-            <div>
-              <dt>Runtime edge</dt>
-              <dd>Client and server adapters translate events into codec messages.</dd>
-            </div>
-          </dl>
-          <ol class="state-line" aria-label="Frame lifecycle">
-            <li>encoded</li>
-            <li>decoded</li>
-            <li>response encoded</li>
-          </ol>
+            <dl class="frame-map">
+              <div>
+                <dt>Fluid name</dt>
+                <dd><code>connect_document</code> lives in <code>dewdrop/events</code>.</dd>
+              </div>
+              <div>
+                <dt>Frame shape</dt>
+                <dd><code>windsock</code> owns the raw <code>42[...]</code> packet.</dd>
+              </div>
+              <div>
+                <dt>Runtime edge</dt>
+                <dd>Client and server adapters translate events into codec messages.</dd>
+              </div>
+            </dl>
+            <ol class="state-line" aria-label="Frame lifecycle">
+              <li>encoded</li>
+              <li>decoded</li>
+              <li>response encoded</li>
+            </ol>
+          </div>
         </div>
       </section>
 

@@ -7,21 +7,21 @@
 
 :root {
   color-scheme: light;
-  --ink: oklch(18% 0.045 205);
-  --ink-soft: oklch(32% 0.04 205);
-  --muted: oklch(45% 0.028 205);
-  --surface: oklch(98% 0.008 182);
-  --surface-strong: oklch(94% 0.025 182);
-  --surface-panel: oklch(24% 0.055 205);
-  --border: oklch(84% 0.035 185);
-  --primary: oklch(54% 0.12 188);
-  --primary-dark: oklch(35% 0.09 198);
-  --primary-ink: oklch(98% 0.012 182);
-  --accent: oklch(71% 0.14 166);
-  --accent-soft: oklch(88% 0.075 168);
-  --code-bg: oklch(16% 0.04 205);
-  --code-ink: oklch(91% 0.035 178);
-  --focus: oklch(66% 0.18 166);
+  --ink: oklch(17% 0.06 246);
+  --ink-soft: oklch(31% 0.052 241);
+  --muted: oklch(43% 0.04 236);
+  --surface: oklch(98% 0.012 219);
+  --surface-strong: oklch(94% 0.028 215);
+  --surface-panel: oklch(23% 0.075 242);
+  --border: oklch(84% 0.045 219);
+  --primary: oklch(55% 0.17 229);
+  --primary-dark: oklch(34% 0.125 241);
+  --primary-ink: oklch(98% 0.012 219);
+  --accent: oklch(73% 0.14 190);
+  --accent-soft: oklch(88% 0.08 194);
+  --code-bg: oklch(15% 0.055 246);
+  --code-ink: oklch(91% 0.035 208);
+  --focus: oklch(67% 0.17 197);
   --shell: min(1120px, calc(100vw - 40px));
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
@@ -51,7 +51,7 @@ body {
   margin: 0;
   overflow-x: clip;
   color: var(--ink);
-  background: linear-gradient(180deg, oklch(97% 0.014 182), var(--surface) 38rem);
+  background: linear-gradient(180deg, oklch(97% 0.018 214), var(--surface) 38rem);
   font-size: 1rem;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -131,7 +131,10 @@ pre code { white-space: pre; }
   letter-spacing: -0.02em;
 }
 
-.brand img { flex: none; }
+.brand img {
+  flex: none;
+  object-fit: contain;
+}
 
 .nav-links {
   gap: var(--space-xs);
@@ -165,6 +168,38 @@ pre code { white-space: pre; }
 }
 
 .hero-copy { max-width: 66ch; }
+
+.hero-art {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.logo-plate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-md);
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid color-mix(in oklch, var(--primary) 32%, var(--border));
+  border-radius: 16px;
+  background: linear-gradient(135deg, oklch(99% 0.01 219), oklch(94% 0.032 210));
+  padding: var(--space-sm) var(--space-md) var(--space-sm) var(--space-sm);
+}
+
+.logo-plate img {
+  width: 4.65rem;
+  height: auto;
+}
+
+.logo-plate p {
+  max-width: 20ch;
+  margin: 0;
+  color: var(--ink-soft);
+  font-weight: 600;
+  line-height: 1.35;
+}
 
 .context-line {
   margin: 0 0 var(--space-lg);
@@ -246,7 +281,7 @@ h3 {
 .button.secondary {
   border: 1px solid var(--border);
   color: var(--ink);
-  background: oklch(99% 0.005 182 / 0.72);
+  background: oklch(99% 0.006 219 / 0.72);
 }
 
 .button.secondary:hover { background: var(--surface-strong); }
@@ -293,7 +328,7 @@ h3 {
   border: 1px solid color-mix(in oklch, var(--primary) 28%, transparent);
   border-radius: 12px;
   padding: var(--space-md);
-  background: color-mix(in oklch, var(--surface-panel) 72%, var(--primary-dark));
+  background: color-mix(in oklch, var(--surface-panel) 74%, var(--primary-dark));
 }
 
 .frame-map dt {
@@ -326,9 +361,9 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  border: 1px solid oklch(71% 0.09 185 / 0.32);
+  border: 1px solid oklch(72% 0.11 199 / 0.32);
   border-radius: 999px;
-  background: oklch(30% 0.055 205 / 0.72);
+  background: oklch(30% 0.07 238 / 0.72);
   color: var(--accent-soft);
   padding: var(--space-xs) var(--space-sm);
   font-size: 0.875rem;
@@ -372,7 +407,7 @@ h3 {
   grid-template-rows: auto 1fr;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: oklch(99% 0.004 182);
+  background: oklch(99% 0.006 219);
   overflow: hidden;
 }
 
@@ -466,7 +501,7 @@ pre {
 
 .layer-section {
   border-block: 1px solid var(--border);
-  background: oklch(94% 0.03 182 / 0.65);
+  background: oklch(94% 0.035 214 / 0.65);
   width: 100%;
   max-width: none;
   padding-inline: max(20px, calc((100vw - 1120px) / 2));
@@ -493,8 +528,8 @@ pre {
 }
 
 .layer-card.current {
-  background: oklch(96% 0.025 182);
-  box-shadow: inset 0 0 0 2px oklch(54% 0.12 188 / 0.55);
+  background: oklch(96% 0.03 214);
+  box-shadow: inset 0 0 0 2px oklch(55% 0.17 229 / 0.55);
 }
 
 .layer-card span {
@@ -515,7 +550,7 @@ pre {
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: oklch(99% 0.004 182);
+  background: oklch(99% 0.006 219);
 }
 
 .event-table {
@@ -586,6 +621,7 @@ pre {
 
   .hero { min-height: auto; }
   h1 { max-width: 12ch; }
+  .logo-plate { width: 100%; }
 }
 
 @media (max-width: 560px) {
