@@ -4,13 +4,13 @@
   "description": "Fluid Framework protocol codec for Gleam.",
   "icons": [
     {
-      "src": "/dewdrop-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/dewdrop-logo.png",
+      "sizes": "445x544",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "theme_color": "#0d3f57",
-  "background_color": "#f6fbf9",
+  "theme_color": "#0c3d82",
+  "background_color": "#f5faff",
   "display": "standalone"
 }
