@@ -17,8 +17,8 @@
 
 import beryl/wire/codec.{
   type Codec, type DecodeError, type Frame, type Inbound, type ReplyStatus,
-  Codec, Event, Heartbeat, Inbound, InvalidFormat, InvalidJson, Join, Leave,
-  StatusError, StatusOk, TextFrame,
+  Event, Heartbeat, InvalidFormat, InvalidJson, Join, Leave, StatusError,
+  StatusOk, TextFrame,
 }
 import dewdrop/events
 import gleam/dynamic.{type Dynamic}
@@ -29,13 +29,13 @@ import windsock
 
 /// Build a Fluid server `Codec` for beryl. Pair with `windsock` framing.
 pub fn server_codec() -> Codec {
-  Codec(
+  codec.new(
     decode_text: decode_text,
-    decode_binary: None,
     encode_reply: encode_reply,
     encode_push: encode_push,
     encode_heartbeat_reply: encode_heartbeat_reply,
   )
+  |> codec.with_topicless_events
 }
 
 fn decode_text(text: String) -> Result(Inbound, DecodeError) {
@@ -57,7 +57,7 @@ fn to_inbound(incoming: windsock.Incoming) -> Inbound {
     e if e == events.close -> Leave
     other -> Event(other)
   }
-  Inbound(
+  codec.inbound(
     join_ref: None,
     ref: None,
     topic: topic_from_payload(payload),
@@ -67,7 +67,7 @@ fn to_inbound(incoming: windsock.Incoming) -> Inbound {
 }
 
 fn heartbeat_inbound() -> Inbound {
-  Inbound(
+  codec.inbound(
     join_ref: None,
     ref: None,
     topic: "",
