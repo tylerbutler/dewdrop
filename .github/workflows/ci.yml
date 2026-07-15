@@ -28,6 +28,18 @@ jobs:
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+        with:
+          run-deps: false
+
+      - name: Download dependencies
+        run: |
+          # A fallback cache can restore stale git deps. Gleam trusts packages.toml,
+          # so remove beryl and its index entry before downloading dependencies.
+          rm -rf build/packages/beryl
+          if [ -f build/packages/packages.toml ]; then
+            sed -i '/^beryl = /d' build/packages/packages.toml
+          fi
+          just deps
 
       - name: Check formatting
         run: just format-check
@@ -53,6 +65,18 @@ jobs:
 
       - name: Setup environment
         uses: tylerbutler/actions/setup-gleam@c3de10f5c576265f4910698528d949179081f25b # ratchet:tylerbutler/actions/setup-gleam@main
+        with:
+          run-deps: false
+
+      - name: Download dependencies
+        run: |
+          # A fallback cache can restore stale git deps. Gleam trusts packages.toml,
+          # so remove beryl and its index entry before downloading dependencies.
+          rm -rf build/packages/beryl
+          if [ -f build/packages/packages.toml ]; then
+            sed -i '/^beryl = /d' build/packages/packages.toml
+          fi
+          just deps
 
       - name: Build documentation
         run: just docs
