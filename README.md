@@ -68,6 +68,11 @@ Socket.IO text frames. It decodes `connect_document` as a beryl join, derives a
 `document:<tenant>:<doc>` topic from the connect payload when possible, handles
 heartbeat ping packets, and encodes Fluid replies and pushes through `windsock`.
 
+It also attaches a close encoder, so beryl sends `42["close"]` when a channel
+terminates gracefully (leave, server shutdown, heartbeat eviction) rather than
+letting the client wait out push timeouts. Abnormal termination is not signalled
+— Fluid has no channel-error event, and `nack` rejects ops rather than channels.
+
 ```gleam
 import beryl
 import dewdrop/server
