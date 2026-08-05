@@ -14,6 +14,15 @@
 //// `Join` whose topic is `document:<tenant>:<doc>` read from the connect
 //// payload. Other frames have no tenant/doc, so they decode with an empty
 //// topic; routing them requires a client->topic map outside this pure codec.
+////
+//// ## Channel termination
+////
+//// A close encoder is attached, so beryl emits `42["close"]` to a client
+//// whenever one of its channels ends gracefully (leave, server shutdown,
+//// heartbeat eviction) instead of leaving the client to time out. No error
+//// encoder is attached: Fluid has no event meaning "this channel crashed"
+//// (`nack` rejects ops, not channels), so abnormal termination stays silent
+//// rather than reusing an event with different semantics.
 
 import beryl/wire/codec.{
   type Codec, type DecodeError, type Frame, type Inbound, type ReplyStatus,
@@ -36,6 +45,7 @@ pub fn server_codec() -> Codec {
     encode_heartbeat_reply: encode_heartbeat_reply,
   )
   |> codec.with_topicless_events
+  |> codec.with_close_encoder(encode_close)
 }
 
 fn decode_text(text: String) -> Result(Inbound, DecodeError) {
@@ -122,4 +132,15 @@ fn encode_push(_topic: String, event: String, payload: Json) -> Frame {
 
 fn encode_heartbeat_reply(_ref: option.Option(String)) -> Frame {
   TextFrame(windsock.pong)
+}
+
+/// Encode a graceful channel termination as Fluid's `close` event.
+///
+/// beryl supplies `(join_ref, topic)` so a Phoenix-style client can tell which
+/// channel closed. Fluid frames carry neither, and this codec is topicless (a
+/// socket has one joined document), so both are dropped and the frame is the
+/// bare `42["close"]` — the server-side mirror of the client's `close`. No
+/// payload is invented because Fluid defines none for this event.
+fn encode_close(_join_ref: option.Option(String), _topic: String) -> Frame {
+  TextFrame(windsock.encode(events.close, []))
 }
