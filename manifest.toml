@@ -8,7 +8,7 @@
 
 packages = [
   { name = "aquamarine", version = "0.1.0", build_tools = ["gleam"], requirements = ["collie", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "logging", "roost"], source = "git", repo = "https://github.com/tylerbutler/aquamarine", commit = "ff078d98d4399b8843f59235ee3f5acf434fe238" },
-  { name = "beryl", version = "0.0.1", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_json", "gleam_otp", "gleam_stdlib", "lattice_presence", "palabres", "telemetry"], source = "git", repo = "https://github.com/tylerbutler/beryl", commit = "e4742cc454bb940a19659caee68d2909de675a72", path = "packages/beryl" },
+  { name = "beryl", version = "0.0.1", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_json", "gleam_otp", "gleam_stdlib", "lattice_presence", "palabres"], source = "git", repo = "https://github.com/tylerbutler/beryl", commit = "6a852e6d94960c8af7c02a9ad4bc77df353e85af", path = "packages/beryl" },
   { name = "collie", version = "3.0.0", build_tools = ["gleam"], requirements = ["exception", "gleam_crypto", "gleam_erlang", "gleam_http", "gleam_otp", "gleam_stdlib", "logging", "websocks"], otp_app = "collie", source = "hex", outer_checksum = "A419EA772E07F5F71F327706DC318440525AF9E3249E915F7A76B3E3C25658D7" },
   { name = "envoy", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "9C6FBB6BFA02A52798BEEC5977A738CAD6E4A057F4B67FD0C8061AD2502C191A" },
   { name = "exception", version = "2.1.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "exception", source = "hex", outer_checksum = "6BDEA95248093599391C3B5DF1835C5C6A86C353C2F99CE539B450E3432FE117" },
@@ -17,20 +17,19 @@ packages = [
   { name = "gleam_http", version = "4.3.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_http", source = "hex", outer_checksum = "82EA6A717C842456188C190AFB372665EA56CE13D8559BF3B1DD9E40F619EE0C" },
   { name = "gleam_json", version = "3.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleam_json", source = "hex", outer_checksum = "44FDAA8847BE8FC48CA7A1C089706BD54BADCC4C45B237A992EDDF9F2CDB2836" },
   { name = "gleam_otp", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_stdlib"], otp_app = "gleam_otp", source = "hex", outer_checksum = "BA6A294E295E428EC1562DC1C11EA7530DCB981E8359134BEABC8493B7B2258E" },
-  { name = "gleam_stdlib", version = "1.0.3", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "1F543AFBA5D33DA493E6087F4E4C4F20D899411343512686C98A8ABB2963CF22" },
+  { name = "gleam_stdlib", version = "1.0.5", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "CEE5B6C076A85B45F60C585F4316C63EC8B7127C119D5738C3958A9C4D50404E" },
   { name = "gleeunit", version = "1.11.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "EC31ABA74256AEA531EDF8169931D775BBB384FED0A8A1BDC4DD9354E3E21826" },
   { name = "lattice_presence", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib"], otp_app = "lattice_presence", source = "hex", outer_checksum = "8A8B79D774015F623D3E370B55B200CC0CF1C49CB6805A1EC849149F60C91037" },
   { name = "logging", version = "1.5.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "logging", source = "hex", outer_checksum = "BC5F18CE5DD9686100229FE5409BDC3DD5C46D5A7DF2F804AD2D8F0DD6C5060E" },
   { name = "palabres", version = "1.0.4", build_tools = ["gleam"], requirements = ["envoy", "gleam_stdlib"], otp_app = "palabres", source = "hex", outer_checksum = "2809B7C10AE929E82454B4A6A0FB7D02073C5A509F9A63EE9F7B268A75D98965" },
   { name = "roost", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib"], source = "git", repo = "https://github.com/tylerbutler/roost.git", commit = "7e4dc7c327ec233c9dc22a9d2037a620e700e127" },
-  { name = "telemetry", version = "1.4.2", build_tools = ["rebar3"], requirements = [], otp_app = "telemetry", source = "hex", outer_checksum = "928F6495066506077862C0D1646609EED891A4326BEE3126BA54B60AF61FEBB1" },
   { name = "websocks", version = "4.0.1", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_stdlib"], otp_app = "websocks", source = "hex", outer_checksum = "89B0C31A032CBE28D4C5FB5CC25A8A690669FEBA501C63F99A4E8F5748750B2A" },
   { name = "windsock", version = "0.1.0", build_tools = ["gleam"], requirements = ["gleam_json", "gleam_stdlib"], source = "git", repo = "https://github.com/tylerbutler/windsock", commit = "a0745584f6291ac00e7f59dbd47ad90b25774bd6" },
 ]
 
 [requirements]
 aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "main" }
-beryl = { git = "https://github.com/tylerbutler/beryl", ref = "main", path = "packages/beryl" }
+beryl = { git = "https://github.com/tylerbutler/beryl", ref = "v0.0", path = "packages/beryl" }
 gleam_json = { version = ">= 3.0.0 and < 4.0.0" }
 gleam_stdlib = { version = ">= 0.48.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
