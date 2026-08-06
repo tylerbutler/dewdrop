@@ -1,9 +1,10 @@
 [tools]
 changie = "latest"
-erlang = "27"
-gleam = "latest"
+erlang = "27.3.4.13"
+gleam = "1.18.1"
 just = "latest"
 node = "24"
+rebar = "3.27.0"
 
 [env]
 LC_ALL = "en_US.UTF-8"

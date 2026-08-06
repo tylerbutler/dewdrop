@@ -26,6 +26,12 @@ pub fn builds_an_aquamarine_codec_with_a_join_frame_test() {
     == "42[\"connect_document\",\"join-1\",{\"id\":\"doc\"}]"
 }
 
+pub fn has_no_leave_frame_test() {
+  // Fluid clients leave a document by dropping the socket, so there is no
+  // leave event to encode.
+  assert dewdrop.codec().leave_event == ""
+}
+
 pub fn decodes_connect_document_success_as_reply_frame_test() {
   let codec = dewdrop.codec()
 

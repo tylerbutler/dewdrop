@@ -49,6 +49,10 @@ pub fn codec() -> aquamarine_codec.Codec {
     matches_reply: matches_reply,
     reply_status: reply_status,
     join_event: connect_document,
+    // Fluid has no per-document leave frame: a client leaves a document by
+    // dropping the socket. Empty, like `heartbeat_topic`, marks the frame as
+    // one this protocol does not have; servers ignore the unknown event.
+    leave_event: "",
     reply_event: connect_document_success,
     close_event: events.close,
     error_event: connect_document_error,
