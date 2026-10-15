@@ -53,7 +53,7 @@ import beryl/wire/codec.{
   Event, Heartbeat, InvalidFormat, InvalidJson, Join, Leave, StatusError,
   StatusOk, TextFrame,
 }
-import dewdrop/events
+import dewdrop/event as fluid_event
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
@@ -79,23 +79,24 @@ pub fn server_codec() -> Codec {
 
 fn decode_text(text: String) -> Result(Inbound, DecodeError) {
   case text {
-    t if t == windsock.ping || t == windsock.pong -> Ok(heartbeat_inbound())
-    t if t == socket_connect ->
+    text if text == windsock.ping || text == windsock.pong ->
+      Ok(heartbeat_inbound())
+    text if text == socket_connect ->
       Error(InvalidFormat("Socket.IO namespace connect is transport control"))
     _ ->
       case windsock.decode(text) {
-        Ok(incoming) -> Ok(to_inbound(incoming))
+        Ok(incoming) -> Ok(incoming_to_inbound(incoming))
         Error(windsock.InvalidJson(reason)) -> Error(InvalidJson(reason))
         Error(windsock.InvalidFormat(reason)) -> Error(InvalidFormat(reason))
       }
   }
 }
 
-fn to_inbound(incoming: windsock.Incoming) -> Inbound {
-  let payload = payload_from_args(incoming.event, incoming.args)
+fn incoming_to_inbound(incoming: windsock.Incoming) -> Inbound {
+  let payload = payload_from_arguments(incoming.event, incoming.args)
   let kind = case incoming.event {
-    e if e == events.connect_document -> Join
-    e if e == events.close -> Leave
+    event if event == fluid_event.connect_document -> Join
+    event if event == fluid_event.close -> Leave
     other -> Event(other)
   }
   codec.inbound(
@@ -109,14 +110,14 @@ fn to_inbound(incoming: windsock.Incoming) -> Inbound {
 
 /// Fold Routerlicious's multi-argument events into one named payload; every
 /// other event's payload is its first argument.
-fn payload_from_args(event: String, args: List(Dynamic)) -> Dynamic {
-  case event, args {
-    e, [client_id, messages, ..] if e == events.submit_op ->
+fn payload_from_arguments(event: String, arguments: List(Dynamic)) -> Dynamic {
+  case event, arguments {
+    event, [client_id, messages, ..] if event == fluid_event.submit_op ->
       dynamic.properties([
         #(dynamic.string("clientId"), client_id),
         #(dynamic.string("messageBatches"), messages),
       ])
-    e, [client_id, signals, ..] if e == events.submit_signal ->
+    event, [client_id, signals, ..] if event == fluid_event.submit_signal ->
       dynamic.properties([
         #(dynamic.string("clientId"), client_id),
         #(dynamic.string("signals"), signals),
@@ -139,11 +140,12 @@ fn heartbeat_inbound() -> Inbound {
 fn topic_from_payload(payload: Dynamic) -> String {
   let tenant =
     field_string(payload, "tenantId", field_string(payload, "tenant", ""))
-  let doc = field_string(payload, "documentId", field_string(payload, "id", ""))
-  case tenant, doc {
+  let document_id =
+    field_string(payload, "documentId", field_string(payload, "id", ""))
+  case tenant, document_id {
     "", _ -> ""
     _, "" -> ""
-    _, _ -> "document:" <> tenant <> ":" <> doc
+    _, _ -> "document:" <> tenant <> ":" <> document_id
   }
 }
 
@@ -163,15 +165,17 @@ fn encode_reply(
 ) -> Frame {
   case status {
     StatusOk ->
-      TextFrame(windsock.encode(events.connect_document_success, [payload]))
+      TextFrame(
+        windsock.encode(fluid_event.connect_document_success, [payload]),
+      )
     StatusError ->
-      TextFrame(windsock.encode(events.connect_document_error, [payload]))
+      TextFrame(windsock.encode(fluid_event.connect_document_error, [payload]))
   }
 }
 
 fn encode_push(topic: String, event: String, payload: Json) -> Frame {
   case event {
-    e if e == events.op || e == events.nack ->
+    event if event == fluid_event.op || event == fluid_event.nack ->
       TextFrame(
         windsock.encode(event, [json.string(document_id(topic)), payload]),
       )
@@ -200,5 +204,5 @@ fn encode_heartbeat_reply(_ref: option.Option(String)) -> Frame {
 /// bare `42["close"]` — the server-side mirror of the client's `close`. No
 /// payload is invented because Fluid defines none for this event.
 fn encode_close(_join_ref: option.Option(String), _topic: String) -> Frame {
-  TextFrame(windsock.encode(events.close, []))
+  TextFrame(windsock.encode(fluid_event.close, []))
 }

@@ -10,7 +10,7 @@ Fluid Framework protocol codec for Gleam — the Fluid analogue of [roost](https
   Socket.IO text frames: an event name plus positional args
   (`42["event", ...args]`).
 - Provides the Fluid event vocabulary (`connect_document`, `submitOp`, `op`,
-  `signal`, `nack`, summaries, close, ...) in `dewdrop/events`.
+  `signal`, `nack`, summaries, close, ...) in `dewdrop/event`.
 - Provides top-level encoders for common client frames and a decoder for inbound
   Fluid event frames.
 - Provides `dewdrop/server`, a beryl server codec for tests and servers that
@@ -45,7 +45,7 @@ top of that raw framing package.
 
 ## Event vocabulary
 
-`dewdrop/events` contains dependency-light constants for the Fluid events dewdrop
+`dewdrop/event` contains dependency-light constants for the Fluid events dewdrop
 knows about:
 
 - `connect_document`
@@ -60,6 +60,9 @@ knows about:
 - `submitSummary`
 - `summaryAck`
 - `summaryNack`
+
+The module was renamed from `dewdrop/events` to `dewdrop/event`. Update existing
+imports to the singular name; the top-level `dewdrop` constants are unchanged.
 
 ## beryl server codec
 

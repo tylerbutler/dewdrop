@@ -28,7 +28,7 @@ canonical Fluid, so it composes with `windsock` instead of roost.
 ## Current state
 
 - `../windsock/src/windsock.gleam` — Socket.IO frame encode/decode + heartbeat.
-- `src/dewdrop/events.gleam` — Fluid event vocabulary.
+- `src/dewdrop/event.gleam` — Fluid event vocabulary.
 - `src/dewdrop.gleam` — Fluid encoders and aquamarine codec adapter.
 - `src/dewdrop/server.gleam` — beryl server codec adapter.
 - dewdrop depends on `windsock`, `aquamarine`, and `beryl`; `windsock` stays

@@ -7,37 +7,37 @@
 ////
 //// The public `codec()` function exposes an `aquamarine/codec.Codec` that
 //// maps Fluid's `connect_document` / `connect_document_success` events onto the
-//// generic channel lifecycle. It currently uses the first positional string arg
+//// generic channel lifecycle. It uses the first positional string argument
 //// as the reply ref on inbound success frames, which keeps the integration
 //// compatible with the current aquamarine transport while the upstream issue
 //// around reply matching remains open.
 
 import aquamarine/codec as aquamarine_codec
-import dewdrop/events
+import dewdrop/event as fluid_event
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode as dynamic_decode
 import gleam/json
 import gleam/option.{type Option, None, Some}
 import windsock
 
-/// Event-name vocabulary lives in `dewdrop/events` so importers can use the
+/// Event-name vocabulary lives in `dewdrop/event` so importers can use the
 /// names without depending on aquamarine or beryl. Re-exported here for
 /// backwards compatibility.
-pub const connect_document = events.connect_document
+pub const connect_document = fluid_event.connect_document
 
-pub const connect_document_success = events.connect_document_success
+pub const connect_document_success = fluid_event.connect_document_success
 
-pub const connect_document_error = events.connect_document_error
+pub const connect_document_error = fluid_event.connect_document_error
 
-pub const submit_op = events.submit_op
+pub const submit_op = fluid_event.submit_op
 
-pub const submit_signal = events.submit_signal
+pub const submit_signal = fluid_event.submit_signal
 
-pub const op = events.op
+pub const op = fluid_event.op
 
-pub const signal = events.signal
+pub const signal = fluid_event.signal
 
-pub const nack = events.nack
+pub const nack = fluid_event.nack
 
 /// Build an `aquamarine/codec.Codec` for Fluid event frames.
 pub fn codec() -> aquamarine_codec.Codec {
@@ -54,7 +54,7 @@ pub fn codec() -> aquamarine_codec.Codec {
     // one this protocol does not have; servers ignore the unknown event.
     leave_event: "",
     reply_event: connect_document_success,
-    close_event: events.close,
+    close_event: fluid_event.close,
     error_event: connect_document_error,
     heartbeat_topic: "",
   )
@@ -93,7 +93,7 @@ fn decode_aquamarine(
         ref: extract_ref(incoming.event, incoming.args),
         topic: "",
         event: incoming.event,
-        payload: payload_from_args(incoming.args),
+        payload: payload_from_arguments(incoming.args),
       ))
     Error(error) -> Error(decode_error(error))
   }
@@ -158,24 +158,21 @@ fn reply_status(incoming: aquamarine_codec.Incoming) -> Result(Nil, String) {
   }
 }
 
-fn extract_ref(event: String, args: List(Dynamic)) -> Option(String) {
-  case event, args {
-    "connect_document_success", [first, ..] -> decode_string(first)
+fn extract_ref(event: String, arguments: List(Dynamic)) -> Option(String) {
+  case event, arguments {
+    "connect_document_success", [first, ..] ->
+      case dynamic_decode.run(first, dynamic_decode.string) {
+        Ok(reference) -> Some(reference)
+        Error(_) -> None
+      }
     _, _ -> None
   }
 }
 
-fn payload_from_args(args: List(Dynamic)) -> Dynamic {
-  case args {
+fn payload_from_arguments(arguments: List(Dynamic)) -> Dynamic {
+  case arguments {
     [] -> dynamic.properties([])
-    [arg] -> arg
-    [_, ..rest] -> payload_from_args(rest)
-  }
-}
-
-fn decode_string(value: Dynamic) -> Option(String) {
-  case dynamic_decode.run(value, dynamic_decode.string) {
-    Ok(string) -> Some(string)
-    Error(_) -> None
+    [argument] -> argument
+    [_, ..rest] -> payload_from_arguments(rest)
   }
 }

@@ -2,12 +2,12 @@ import dewdrop
 import gleam/json
 import gleam/option
 
-pub fn encodes_connect_document_test() {
+pub fn encodes_connect_document_test() -> Nil {
   assert dewdrop.encode_connect(json.object([#("id", json.string("doc"))]))
     == "42[\"connect_document\",{\"id\":\"doc\"}]"
 }
 
-pub fn encodes_submit_op_with_client_id_and_messages_test() {
+pub fn encodes_submit_op_with_client_id_and_messages_test() -> Nil {
   assert dewdrop.encode_submit_op(
       json.string("c1"),
       json.preprocessed_array([]),
@@ -15,7 +15,7 @@ pub fn encodes_submit_op_with_client_id_and_messages_test() {
     == "42[\"submitOp\",\"c1\",[]]"
 }
 
-pub fn builds_an_aquamarine_codec_with_a_join_frame_test() {
+pub fn builds_an_aquamarine_codec_with_a_join_frame_test() -> Nil {
   let codec = dewdrop.codec()
 
   assert codec.encode_join(
@@ -26,13 +26,13 @@ pub fn builds_an_aquamarine_codec_with_a_join_frame_test() {
     == "42[\"connect_document\",\"join-1\",{\"id\":\"doc\"}]"
 }
 
-pub fn has_no_leave_frame_test() {
+pub fn has_no_leave_frame_test() -> Nil {
   // Fluid clients leave a document by dropping the socket, so there is no
   // leave event to encode.
   assert dewdrop.codec().leave_event == ""
 }
 
-pub fn decodes_connect_document_success_as_reply_frame_test() {
+pub fn decodes_connect_document_success_as_reply_frame_test() -> Nil {
   let codec = dewdrop.codec()
 
   let assert Ok(incoming) =
