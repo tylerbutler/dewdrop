@@ -37,9 +37,10 @@ canonical Fluid, so it composes with `windsock` instead of roost.
 
 ## Current integration notes
 
-`dewdrop.codec()` now returns an `aquamarine/codec.Codec` using Fluid events and
-custom reply matching for `connect_document_success`. `dewdrop/server` exposes a
-beryl codec that maps Fluid Socket.IO frames into beryl inbound messages.
+`dewdrop.codec()` returns an `aquamarine/codec.Codec` using Fluid events and
+reference-prefixed joins. `dewdrop/server` retains the join reference and payload,
+then echoes the reference in success and error replies. Payload-only Fluid joins
+remain supported without a reference.
 
 Next protocol work should stay above `windsock`: payload normalization, richer
 Fluid message typing, and levee integration tests belong in

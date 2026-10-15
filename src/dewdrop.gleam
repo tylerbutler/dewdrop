@@ -6,11 +6,10 @@
 //// codec, the same way `roost` backs `aquamarine/phoenix`.
 ////
 //// The public `codec()` function exposes an `aquamarine/codec.Codec` that
-//// maps Fluid's `connect_document` / `connect_document_success` events onto the
-//// generic channel lifecycle. It uses the first positional string argument
-//// as the reply ref on inbound success frames, which keeps the integration
-//// compatible with the current aquamarine transport while the upstream issue
-//// around reply matching remains open.
+//// maps Fluid's connect, success, and error events onto the generic channel
+//// lifecycle. The aquamarine adapter prefixes joins with a string reference;
+//// `dewdrop/server` echoes it in success and error replies. Payload-only
+//// encoders remain available for canonical Fluid frames.
 
 import aquamarine/codec as aquamarine_codec
 import dewdrop/event as fluid_event
@@ -18,6 +17,7 @@ import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode as dynamic_decode
 import gleam/json
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import windsock
 
 /// Event-name vocabulary lives in `dewdrop/event` so importers can use the
@@ -87,14 +87,16 @@ fn decode_aquamarine(
   text: String,
 ) -> Result(aquamarine_codec.Incoming, aquamarine_codec.DecodeError) {
   case decode(text) {
-    Ok(incoming) ->
+    Ok(incoming) -> {
+      use reference <- result.try(extract_ref(incoming.event, incoming.args))
       Ok(aquamarine_codec.Incoming(
         join_ref: None,
-        ref: extract_ref(incoming.event, incoming.args),
+        ref: reference,
         topic: "",
         event: incoming.event,
         payload: payload_from_arguments(incoming.args),
       ))
+    }
     Error(error) -> Error(decode_error(error))
   }
 }
@@ -133,9 +135,14 @@ fn matches_reply(
   incoming: aquamarine_codec.Incoming,
   join_ref: String,
 ) -> Bool {
-  case incoming.event, incoming.ref {
-    "connect_document_success", Some(reply_ref) -> reply_ref == join_ref
-    _, _ -> False
+  case incoming.ref {
+    Some(reply_ref) ->
+      reply_ref == join_ref
+      && {
+        incoming.event == connect_document_success
+        || incoming.event == connect_document_error
+      }
+    None -> False
   }
 }
 
@@ -154,18 +161,38 @@ fn reply_status(incoming: aquamarine_codec.Incoming) -> Result(Nil, String) {
         Ok(_) -> Error("join rejected")
         Error(_) -> Error("malformed reply")
       }
+    "connect_document_error" ->
+      case
+        dynamic_decode.run(
+          incoming.payload,
+          dynamic_decode.field(
+            "reason",
+            dynamic_decode.string,
+            dynamic_decode.success,
+          ),
+        )
+      {
+        Ok(reason) -> Error(reason)
+        Error(_) -> Error("join rejected")
+      }
     _ -> Error("malformed reply")
   }
 }
 
-fn extract_ref(event: String, arguments: List(Dynamic)) -> Option(String) {
+fn extract_ref(
+  event: String,
+  arguments: List(Dynamic),
+) -> Result(Option(String), aquamarine_codec.DecodeError) {
   case event, arguments {
-    "connect_document_success", [first, ..] ->
-      case dynamic_decode.run(first, dynamic_decode.string) {
-        Ok(reference) -> Some(reference)
-        Error(_) -> None
-      }
-    _, _ -> None
+    event, [reference, _, ..]
+      if event == connect_document_success || event == connect_document_error
+    ->
+      dynamic_decode.run(reference, dynamic_decode.string)
+      |> result.map(Some)
+      |> result.replace_error(aquamarine_codec.InvalidFormat(
+        "Join reply reference must be a string",
+      ))
+    _, _ -> Ok(None)
   }
 }
 

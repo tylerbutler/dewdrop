@@ -1,3 +1,4 @@
+import aquamarine/codec as aquamarine_codec
 import dewdrop
 import gleam/json
 import gleam/option
@@ -42,4 +43,44 @@ pub fn decodes_connect_document_success_as_reply_frame_test() -> Nil {
 
   assert incoming.event == "connect_document_success"
   assert incoming.ref == option.Some("join-1")
+}
+
+pub fn does_not_match_uncorrelated_join_replies_test() -> Nil {
+  let codec = dewdrop.codec()
+  let assert Ok(success) =
+    codec.decode("42[\"connect_document_success\",{\"status\":\"ok\"}]")
+  assert success.ref == option.None
+  assert !codec.matches_reply(success, "join-1")
+  let assert Ok(rejection) =
+    codec.decode("42[\"connect_document_error\",{\"reason\":\"rejected\"}]")
+  assert rejection.ref == option.None
+  assert !codec.matches_reply(rejection, "join-1")
+}
+
+pub fn rejects_non_string_join_reply_references_test() -> Nil {
+  let codec = dewdrop.codec()
+  assert codec.decode("42[\"connect_document_success\",1,{\"status\":\"ok\"}]")
+    == Error(aquamarine_codec.InvalidFormat(
+      "Join reply reference must be a string",
+    ))
+  assert codec.decode("42[\"connect_document_error\",1,{}]")
+    == Error(aquamarine_codec.InvalidFormat(
+      "Join reply reference must be a string",
+    ))
+}
+
+pub fn rejects_a_join_when_the_error_reply_has_no_reason_test() -> Nil {
+  let codec = dewdrop.codec()
+  let assert Ok(incoming) =
+    codec.decode("42[\"connect_document_error\",\"join-1\",{}]")
+  assert codec.matches_reply(incoming, "join-1")
+  assert codec.reply_status(incoming) == Error("join rejected")
+}
+
+pub fn does_not_match_a_non_reply_event_with_a_reference_test() -> Nil {
+  let codec = dewdrop.codec()
+  let assert Ok(incoming) = codec.decode("42[\"op\",\"join-1\",{}]")
+  let incoming =
+    aquamarine_codec.Incoming(..incoming, ref: option.Some("join-1"))
+  assert !codec.matches_reply(incoming, "join-1")
 }

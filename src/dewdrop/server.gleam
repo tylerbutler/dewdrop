@@ -28,6 +28,11 @@
 //// - Pushing `op` or `nack` encodes as `op(documentId, payload)`, with the
 ////   document id taken from the `document:<tenant>:<doc>` topic.
 ////
+//// For aquamarine, `connect_document(join_ref, payload)` retains the string
+//// reference and uses the second argument as the payload. Success and error
+//// replies echo that reference before their payload. Canonical payload-only
+//// joins still receive payload-only replies.
+////
 //// Every other event uses its first argument as the payload (or an empty
 //// object when there is none) and is pushed as `event(payload)`.
 ////
@@ -57,7 +62,8 @@ import dewdrop/event as fluid_event
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
-import gleam/option.{None}
+import gleam/option.{None, Some}
+import gleam/result
 import gleam/string
 import windsock
 
@@ -85,27 +91,35 @@ fn decode_text(text: String) -> Result(Inbound, DecodeError) {
       Error(InvalidFormat("Socket.IO namespace connect is transport control"))
     _ ->
       case windsock.decode(text) {
-        Ok(incoming) -> Ok(incoming_to_inbound(incoming))
+        Ok(incoming) -> incoming_to_inbound(incoming)
         Error(windsock.InvalidJson(reason)) -> Error(InvalidJson(reason))
         Error(windsock.InvalidFormat(reason)) -> Error(InvalidFormat(reason))
       }
   }
 }
 
-fn incoming_to_inbound(incoming: windsock.Incoming) -> Inbound {
-  let payload = payload_from_arguments(incoming.event, incoming.args)
+fn incoming_to_inbound(
+  incoming: windsock.Incoming,
+) -> Result(Inbound, DecodeError) {
+  use #(join_ref, payload) <- result.try(case incoming.event, incoming.args {
+    event, [reference, payload, ..] if event == fluid_event.connect_document ->
+      decode.run(reference, decode.string)
+      |> result.map(fn(reference) { #(Some(reference), payload) })
+      |> result.replace_error(InvalidFormat("Join reference must be a string"))
+    _, _ -> Ok(#(None, payload_from_arguments(incoming.event, incoming.args)))
+  })
   let kind = case incoming.event {
     event if event == fluid_event.connect_document -> Join
     event if event == fluid_event.close -> Leave
     other -> Event(other)
   }
-  codec.inbound(
-    join_ref: None,
-    ref: None,
+  Ok(codec.inbound(
+    join_ref: join_ref,
+    ref: join_ref,
     topic: topic_from_payload(payload),
     kind: kind,
     payload: payload,
-  )
+  ))
 }
 
 /// Fold Routerlicious's multi-argument events into one named payload; every
@@ -157,20 +171,21 @@ fn field_string(value: Dynamic, key: String, fallback: String) -> String {
 }
 
 fn encode_reply(
-  _join_ref: option.Option(String),
+  join_ref: option.Option(String),
   _ref: option.Option(String),
   _topic: String,
   status: ReplyStatus,
   payload: Json,
 ) -> Frame {
-  case status {
-    StatusOk ->
-      TextFrame(
-        windsock.encode(fluid_event.connect_document_success, [payload]),
-      )
-    StatusError ->
-      TextFrame(windsock.encode(fluid_event.connect_document_error, [payload]))
+  let event = case status {
+    StatusOk -> fluid_event.connect_document_success
+    StatusError -> fluid_event.connect_document_error
   }
+  let arguments = case join_ref {
+    Some(reference) -> [json.string(reference), payload]
+    None -> [payload]
+  }
+  TextFrame(windsock.encode(event, arguments))
 }
 
 fn encode_push(topic: String, event: String, payload: Json) -> Frame {

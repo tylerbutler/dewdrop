@@ -1,6 +1,7 @@
 import beryl/wire/codec.{
   Event, Heartbeat, InvalidFormat, Join, Leave, StatusError, StatusOk, TextFrame,
 }
+import dewdrop
 import dewdrop/server
 import gleam/dynamic
 import gleam/dynamic/decode
@@ -25,6 +26,92 @@ pub fn maps_connect_document_to_join_with_document_topic_test() -> Nil {
   let assert Ok(inbound) = decode(frame)
   assert codec.inbound_kind(inbound) == Join
   assert codec.inbound_topic(inbound) == "document:t1:d1"
+  assert codec.inbound_join_ref(inbound) == None
+  assert codec.inbound_ref(inbound) == None
+}
+
+pub fn round_trips_an_aquamarine_join_test() -> Nil {
+  let client_codec = dewdrop.codec()
+  let server_codec = server.server_codec()
+  let request =
+    client_codec.encode_join(
+      "join-1",
+      "document:t1:d1",
+      json.object([
+        #("tenantId", json.string("t1")),
+        #("documentId", json.string("d1")),
+      ]),
+    )
+  let assert Ok(inbound) = codec.apply_decode_text(server_codec, request)
+  assert codec.inbound_kind(inbound) == Join
+  assert codec.inbound_topic(inbound) == "document:t1:d1"
+  assert codec.inbound_join_ref(inbound) == Some("join-1")
+  assert codec.inbound_ref(inbound) == Some("join-1")
+  assert decode.run(
+      codec.inbound_payload(inbound),
+      decode.at(["tenantId"], decode.string),
+    )
+    == Ok("t1")
+  assert decode.run(
+      codec.inbound_payload(inbound),
+      decode.at(["documentId"], decode.string),
+    )
+    == Ok("d1")
+
+  let assert TextFrame(reply) =
+    codec.apply_encode_reply(
+      server_codec,
+      codec.inbound_join_ref(inbound),
+      codec.inbound_ref(inbound),
+      codec.inbound_topic(inbound),
+      StatusOk,
+      json.object([#("status", json.string("ok"))]),
+    )
+  assert reply
+    == "42[\"connect_document_success\",\"join-1\",{\"status\":\"ok\"}]"
+  let assert Ok(incoming) = client_codec.decode(reply)
+  assert incoming.ref == Some("join-1")
+  assert client_codec.matches_reply(incoming, "join-1")
+  assert !client_codec.matches_reply(incoming, "other-join")
+  assert client_codec.reply_status(incoming) == Ok(Nil)
+}
+
+pub fn round_trips_an_aquamarine_join_rejection_test() -> Nil {
+  let client_codec = dewdrop.codec()
+  let server_codec = server.server_codec()
+  let request =
+    client_codec.encode_join(
+      "join-2",
+      "document:t1:d1",
+      json.object([
+        #("tenantId", json.string("t1")),
+        #("documentId", json.string("d1")),
+      ]),
+    )
+  let assert Ok(inbound) = codec.apply_decode_text(server_codec, request)
+  let assert TextFrame(reply) =
+    codec.apply_encode_reply(
+      server_codec,
+      codec.inbound_join_ref(inbound),
+      codec.inbound_ref(inbound),
+      codec.inbound_topic(inbound),
+      StatusError,
+      json.object([#("reason", json.string("document not found"))]),
+    )
+  assert reply
+    == "42[\"connect_document_error\",\"join-2\",{\"reason\":\"document not found\"}]"
+  let assert Ok(incoming) = client_codec.decode(reply)
+  assert incoming.ref == Some("join-2")
+  assert client_codec.matches_reply(incoming, "join-2")
+  assert !client_codec.matches_reply(incoming, "other-join")
+  assert client_codec.reply_status(incoming) == Error("document not found")
+}
+
+pub fn rejects_a_non_string_join_reference_test() -> Nil {
+  assert decode(
+      "42[\"connect_document\",1,{\"tenantId\":\"t1\",\"documentId\":\"d1\"}]",
+    )
+    == Error(InvalidFormat("Join reference must be a string"))
 }
 
 pub fn maps_close_to_leave_test() -> Nil {

@@ -88,10 +88,17 @@ pub fn config() {
 ## aquamarine integration
 
 `dewdrop.codec()` exposes a minimal `aquamarine/codec.Codec` for Fluid's
-`connect_document` / `connect_document_success` handshake. It uses the first
-positional string arg as the reply ref when decoding success frames, which keeps
-upstream aquamarine's channel lifecycle usable while the Socket.IO-specific
-reply-correlation issue remains open.
+join handshake. It sends `connect_document(join_ref, payload)`, where `join_ref`
+is a string used to match the reply to the waiting join call.
+`dewdrop/server` retains this reference, reads the document payload from the
+second argument, and echoes the reference in both success and error replies.
+Success payloads must contain `"status": "ok"`; error payloads can contain a
+string `"reason"`, which is returned to the caller.
+
+This reference-prefixed form is an adapter extension, not the canonical Fluid
+join shape. `dewdrop.encode_connect(payload)` still sends the payload-only form;
+the server accepts it and replies without a reference. The aquamarine adapter
+does not match replies that have no reference.
 
 ## Why this is not a Phoenix channel codec
 
