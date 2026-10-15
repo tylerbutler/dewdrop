@@ -98,6 +98,11 @@ string `"reason"`, which is returned to the caller.
 The adapter accepts Engine.IO pong packets (`3`) without sending them to
 channels or failing pending joins. `dewdrop.decode` remains event-only.
 
+Use one document per socket. The adapter enables Aquamarine's topicless routing:
+events with no topic reach the sole joined channel, and a server `close` ends
+that channel and removes it from reconnect state. Aquamarine rejects a second
+document with `TopiclessSocketOccupied`, including while a join is pending.
+
 This reference-prefixed form is an adapter extension, not the canonical Fluid
 join shape. `dewdrop.encode_connect(payload)` still sends the payload-only form;
 the server accepts it and replies without a reference. The aquamarine adapter

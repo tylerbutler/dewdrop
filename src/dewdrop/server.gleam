@@ -13,7 +13,7 @@
 //// Socket.IO frames carry no topic. `connect_document` is mapped to a beryl
 //// `Join` whose topic is `document:<tenant>:<doc>` read from the connect
 //// payload. Other frames have no tenant/doc, so they decode with an empty
-//// topic; routing them requires a client->topic map outside this pure codec.
+//// topic; beryl routes them to the socket's sole joined document.
 ////
 //// ## Routerlicious argument shapes
 ////

@@ -7,7 +7,7 @@
 # You should check this file into your source control repository.
 
 packages = [
-  { name = "aquamarine", version = "0.1.0", build_tools = ["gleam"], requirements = ["collie", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "logging", "roost"], source = "git", repo = "https://github.com/tylerbutler/aquamarine", commit = "ff078d98d4399b8843f59235ee3f5acf434fe238" },
+  { name = "aquamarine", version = "0.1.0", build_tools = ["gleam"], requirements = ["collie", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "logging", "roost"], source = "git", repo = "https://github.com/tylerbutler/aquamarine", commit = "b81ada51412f6a0337c91460bc47c494d93ba3fb" },
   { name = "beryl", version = "0.5.0", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_http", "gleam_json", "gleam_otp", "gleam_stdlib", "lattice_presence", "palabres", "rasa", "telemetry"], source = "git", repo = "https://github.com/tylerbutler/beryl", commit = "82a95917c00382a862a13103df97f966c699e870", path = "packages/beryl" },
   { name = "collie", version = "3.0.0", build_tools = ["gleam"], requirements = ["exception", "gleam_crypto", "gleam_erlang", "gleam_http", "gleam_otp", "gleam_stdlib", "logging", "websocks"], otp_app = "collie", source = "hex", outer_checksum = "A419EA772E07F5F71F327706DC318440525AF9E3249E915F7A76B3E3C25658D7" },
   { name = "envoy", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "9C6FBB6BFA02A52798BEEC5977A738CAD6E4A057F4B67FD0C8061AD2502C191A" },
@@ -32,7 +32,7 @@ packages = [
 ]
 
 [requirements]
-aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "main" }
+aquamarine = { git = "https://github.com/tylerbutler/aquamarine", ref = "b81ada51412f6a0337c91460bc47c494d93ba3fb" }
 beryl = { git = "https://github.com/tylerbutler/beryl", ref = "v0.5", path = "packages/beryl" }
 gleam_erlang = { version = ">= 1.3.0 and < 2.0.0" }
 gleam_json = { version = ">= 3.0.0 and < 4.0.0" }

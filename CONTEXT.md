@@ -42,6 +42,10 @@ reference-prefixed joins. `dewdrop/server` retains the join reference and payloa
 then echoes the reference in success and error replies. Payload-only Fluid joins
 remain supported without a reference.
 
+The adapter enables Aquamarine's topicless routing and permits one document per
+socket. Topicless events and graceful closes reach that channel. Pong packets
+use a separate reserved topic and do not affect pending joins.
+
 Next protocol work should stay above `windsock`: payload normalization, richer
 Fluid message typing, and levee integration tests belong in
 dewdrop/spillway/levee, not the raw frame package.

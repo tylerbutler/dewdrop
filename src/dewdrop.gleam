@@ -10,6 +10,8 @@
 //// lifecycle. The aquamarine adapter prefixes joins with a string reference;
 //// `dewdrop/server` echoes it in success and error replies. Payload-only
 //// encoders remain available for canonical Fluid frames.
+//// Each socket supports one joined document so topicless events, including
+//// `close`, reach the correct channel.
 
 import aquamarine/codec as aquamarine_codec
 import dewdrop/event as fluid_event
@@ -59,6 +61,7 @@ pub fn codec() -> aquamarine_codec.Codec {
     close_event: fluid_event.close,
     error_event: connect_document_error,
     heartbeat_topic: heartbeat_topic,
+    topicless_events: True,
   )
 }
 

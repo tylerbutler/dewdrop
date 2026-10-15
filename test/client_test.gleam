@@ -7,6 +7,40 @@ import dewdrop
 import dewdrop/server
 import gleam/erlang/process.{type Subject}
 import gleam/json
+import gleam/option.{Some}
+
+pub fn server_close_reaches_the_channel_and_allows_rejoining_test() -> Nil {
+  let #(socket, sink) = start_socket(accept_join)
+  let assert Ok(channel) =
+    channel.join(socket, "document:t1:d1", join_payload(), 1000)
+  let assert Some(encode_close) = codec.encode_close(server.server_codec())
+  let assert codec.TextFrame(close) = encode_close(Some("1"), "document:t1:d1")
+  process.send(sink, transport.Text(close))
+  assert channel.receive(channel, 1000) == Error(error.ChannelClosed)
+
+  let assert Ok(rejoined) =
+    channel.join(socket, "document:t1:d1", join_payload(), 1000)
+  process.send(sink, transport.Text("42[\"signal\",{\"message\":\"hello\"}]"))
+  let received = channel.receive(rejoined, 1000)
+  let assert Ok(Nil) = socket.close(socket)
+
+  let assert Ok(incoming) = received
+  assert incoming.topic == "document:t1:d1"
+  assert incoming.event == "signal"
+  assert channel.receive(channel, 0) == Error(error.Transport(error.Timeout))
+  assert channel.receive(rejoined, 1000) == Error(error.ChannelClosed)
+}
+
+pub fn rejects_a_second_document_on_the_same_socket_test() -> Nil {
+  let #(socket, _) = start_socket(accept_join)
+  let assert Ok(channel) =
+    channel.join(socket, "document:t1:d1", join_payload(), 1000)
+  let second_join = channel.join(socket, "document:t1:d2", join_payload(), 1000)
+  let assert Ok(Nil) = socket.close(socket)
+
+  assert second_join == Error(error.TopiclessSocketOccupied("document:t1:d1"))
+  assert channel.receive(channel, 1000) == Error(error.ChannelClosed)
+}
 
 pub fn pong_does_not_fail_a_pending_join_or_reach_a_channel_test() -> Nil {
   let #(socket, sink) =
