@@ -12,7 +12,8 @@
 ////
 //// Socket.IO frames carry no topic. `connect_document` is mapped to a beryl
 //// `Join` whose topic is `document:<tenant>:<doc>` read from the connect
-//// payload. Other frames have no tenant/doc, so they decode with an empty
+//// payload, with `%` and `:` escaped in each component. Other frames have
+//// no tenant/doc, so they decode with an empty
 //// topic; beryl routes them to the socket's sole joined document.
 ////
 //// ## Routerlicious argument shapes
@@ -159,8 +160,18 @@ fn topic_from_payload(payload: Dynamic) -> String {
   case tenant, document_id {
     "", _ -> ""
     _, "" -> ""
-    _, _ -> "document:" <> tenant <> ":" <> document_id
+    _, _ ->
+      "document:"
+      <> escape_topic_component(tenant)
+      <> ":"
+      <> escape_topic_component(document_id)
   }
+}
+
+fn escape_topic_component(value: String) -> String {
+  value
+  |> string.replace(each: "%", with: "%25")
+  |> string.replace(each: ":", with: "%3A")
 }
 
 fn field_string(value: Dynamic, key: String, fallback: String) -> String {
@@ -198,11 +209,14 @@ fn encode_push(topic: String, event: String, payload: Json) -> Frame {
   }
 }
 
-/// The `<doc>` of a `document:<tenant>:<doc>` topic. Any other topic is
-/// passed through unchanged so a non-standard topic still yields a frame.
+/// Decode the document component of a topic derived from a join. Other topics
+/// pass through unchanged.
 fn document_id(topic: String) -> String {
   case string.split(topic, ":") {
-    ["document", _, document_id] -> document_id
+    ["document", _, document_id] ->
+      document_id
+      |> string.replace(each: "%3A", with: ":")
+      |> string.replace(each: "%25", with: "%")
     _ -> topic
   }
 }

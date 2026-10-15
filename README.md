@@ -76,6 +76,11 @@ terminates gracefully (leave, server shutdown, heartbeat eviction) rather than
 letting the client wait out push timeouts. Abnormal termination is not signalled
 — Fluid has no channel-error event, and `nack` rejects ops rather than channels.
 
+Topic components escape `%` as `%25` and `:` as `%3A`. For example, tenant `t`
+and document `a:b` use `document:t:a%3Ab`; outbound `op` and `nack` frames still
+contain the original document ID `a:b`. If you construct topics yourself, apply
+these escapes in that order, or use the topic from the decoded join.
+
 ```gleam
 import beryl
 import dewdrop/server

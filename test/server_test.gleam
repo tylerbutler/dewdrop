@@ -6,7 +6,9 @@ import dewdrop/server
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/json
+import gleam/list
 import gleam/option.{None, Some}
+import windsock
 
 fn decode(text: String) -> Result(codec.Inbound, codec.DecodeError) {
   let server_codec = server.server_codec()
@@ -207,6 +209,47 @@ pub fn passes_a_non_document_topic_through_as_the_document_id_test() -> Nil {
   let server_codec = server.server_codec()
   assert codec.encode_push(server_codec)("lobby", "op", json.string("x"))
     == TextFrame("42[\"op\",\"lobby\",\"x\"]")
+}
+
+pub fn distinguishes_identifiers_containing_topic_delimiters_test() -> Nil {
+  let document_colon = document_join("t", "a:b")
+  let tenant_colon = document_join("t:a", "b")
+  let literal_escape = document_join("t%3Aa", "b")
+  assert codec.inbound_topic(document_colon) == "document:t:a%3Ab"
+  assert codec.inbound_topic(tenant_colon) == "document:t%3Aa:b"
+  assert codec.inbound_topic(literal_escape) == "document:t%253Aa:b"
+}
+
+pub fn round_trips_escaped_document_ids_in_ops_and_nacks_test() -> Nil {
+  let server_codec = server.server_codec()
+  use document_id <- list.each(["a:b", "%3A:%25", "100%:a/b c", "::"])
+  let inbound = document_join("tenant:%3A", document_id)
+  use event <- list.each(["op", "nack"])
+  let assert TextFrame(encoded) =
+    codec.apply_encode_push(
+      server_codec,
+      codec.inbound_topic(inbound),
+      event,
+      json.string("payload"),
+    )
+  let assert Ok(incoming) = windsock.decode(encoded)
+  let assert [document, payload] = incoming.args
+  assert incoming.event == event
+  assert decode.run(document, decode.string) == Ok(document_id)
+  assert decode.run(payload, decode.string) == Ok("payload")
+}
+
+fn document_join(tenant: String, document: String) -> codec.Inbound {
+  let assert Ok(inbound) =
+    decode(
+      dewdrop.encode_connect(
+        json.object([
+          #("tenantId", json.string(tenant)),
+          #("documentId", json.string(document)),
+        ]),
+      ),
+    )
+  inbound
 }
 
 pub fn keeps_topicless_events_enabled_test() -> Nil {
