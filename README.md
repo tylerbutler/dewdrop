@@ -132,3 +132,10 @@ frame:
 
 That difference is why dewdrop uses `windsock` for Socket.IO framing instead of
 reusing the Phoenix codec shape from roost.
+
+## Build documentation
+
+Run `just docs` to build the Gleam API documentation. The website is a separate
+Astro page: install its dependencies with `cd website && pnpm install`, then run
+`just site-build` from the repository root. It does not use generated reference
+pages.

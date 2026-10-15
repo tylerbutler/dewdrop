@@ -53,12 +53,8 @@ check:
 docs:
     gleam docs build
 
-# Generate website reference docs from Gleam docs metadata
-site-reference: docs
-    cd website && pnpm generate:reference
-
 # Build website
-site-build: site-reference
+site-build:
     cd website && pnpm build
 
 # === CHANGELOG ===
