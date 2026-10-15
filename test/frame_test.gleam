@@ -33,6 +33,16 @@ pub fn has_no_leave_frame_test() -> Nil {
   assert dewdrop.codec().leave_event == ""
 }
 
+pub fn decodes_pong_without_matching_a_pending_reply_test() -> Nil {
+  let codec = dewdrop.codec()
+  let assert Ok(incoming) = codec.decode("3")
+  assert incoming.topic == codec.heartbeat_topic
+  assert incoming.ref == option.None
+  assert !codec.matches_reply(incoming, "join-1")
+  let assert Error(_) = dewdrop.decode("3")
+  Nil
+}
+
 pub fn decodes_connect_document_success_as_reply_frame_test() -> Nil {
   let codec = dewdrop.codec()
 

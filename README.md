@@ -95,6 +95,9 @@ second argument, and echoes the reference in both success and error replies.
 Success payloads must contain `"status": "ok"`; error payloads can contain a
 string `"reason"`, which is returned to the caller.
 
+The adapter accepts Engine.IO pong packets (`3`) without sending them to
+channels or failing pending joins. `dewdrop.decode` remains event-only.
+
 This reference-prefixed form is an adapter extension, not the canonical Fluid
 join shape. `dewdrop.encode_connect(payload)` still sends the payload-only form;
 the server accepts it and replies without a reference. The aquamarine adapter

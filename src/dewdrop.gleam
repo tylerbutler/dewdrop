@@ -39,6 +39,8 @@ pub const signal = fluid_event.signal
 
 pub const nack = fluid_event.nack
 
+const heartbeat_topic = "$dewdrop:heartbeat"
+
 /// Build an `aquamarine/codec.Codec` for Fluid event frames.
 pub fn codec() -> aquamarine_codec.Codec {
   aquamarine_codec.Codec(
@@ -50,13 +52,13 @@ pub fn codec() -> aquamarine_codec.Codec {
     reply_status: reply_status,
     join_event: connect_document,
     // Fluid has no per-document leave frame: a client leaves a document by
-    // dropping the socket. Empty, like `heartbeat_topic`, marks the frame as
-    // one this protocol does not have; servers ignore the unknown event.
+    // dropping the socket. Empty marks the frame as one this protocol does
+    // not have; servers ignore the unknown event.
     leave_event: "",
     reply_event: connect_document_success,
     close_event: fluid_event.close,
     error_event: connect_document_error,
-    heartbeat_topic: "",
+    heartbeat_topic: heartbeat_topic,
   )
 }
 
@@ -86,18 +88,29 @@ pub fn decode(text: String) -> Result(windsock.Incoming, windsock.DecodeError) {
 fn decode_aquamarine(
   text: String,
 ) -> Result(aquamarine_codec.Incoming, aquamarine_codec.DecodeError) {
-  case decode(text) {
-    Ok(incoming) -> {
-      use reference <- result.try(extract_ref(incoming.event, incoming.args))
+  case text {
+    text if text == windsock.pong ->
       Ok(aquamarine_codec.Incoming(
         join_ref: None,
-        ref: reference,
-        topic: "",
-        event: incoming.event,
-        payload: payload_from_arguments(incoming.args),
+        ref: None,
+        topic: heartbeat_topic,
+        event: windsock.pong,
+        payload: dynamic.properties([]),
       ))
-    }
-    Error(error) -> Error(decode_error(error))
+    _ ->
+      case decode(text) {
+        Ok(incoming) -> {
+          use reference <- result.try(extract_ref(incoming.event, incoming.args))
+          Ok(aquamarine_codec.Incoming(
+            join_ref: None,
+            ref: reference,
+            topic: "",
+            event: incoming.event,
+            payload: payload_from_arguments(incoming.args),
+          ))
+        }
+        Error(error) -> Error(decode_error(error))
+      }
   }
 }
 
