@@ -58,22 +58,3 @@ run. A dispatch from newer `main` does not recover publication of that merge.
 Keep the exact Trellis pin in `.mise.toml` and the coordinator's
 `trellis_version` input in `.github/workflows/release.yml` at the same version.
 Update the shared workflow's full commit reference after reviewing its changes.
-
-### Repository setup
-
-Before enabling release preparation, install a release GitHub App on this
-repository with **Contents: read and write**, **Pull requests: read and write**,
-and **Commit statuses: read and write**. Add its credentials as repository or
-accessible organization Actions secrets:
-
-- `RELEASE_APP_ID`
-- `RELEASE_APP_PRIVATE_KEY`
-
-The App token lets release PR updates trigger CI. Give the workflow token
-permission to write contents and commit statuses and read pull requests, as
-declared in the workflow. Permit the App to push `release/pending` under the
-repository's rules. Maintainers still approve and merge release PRs.
-Permit the workflow token to update floating major and minor tags under any
-repository tag rules.
-
-No Hex/npm credentials are needed. Do not dispatch a release to test setup.
