@@ -1,10 +1,7 @@
 # Agent skills and customization assets.
-/.agents/skills/** linguist-vendored=true
-/.claude/skills/** linguist-vendored=true
-/.claude/agents/** linguist-vendored=true
-/.claude/commands/** linguist-vendored=true
-/.claude/rules/** linguist-vendored=true
-/.claude/apm-hooks.json linguist-vendored=true
+/.agents/** linguist-vendored=true
+/.claude/** linguist-vendored=true
+/.github/skills/** linguist-vendored=true
 /.github/agents/** linguist-vendored=true
 /.github/hooks/** linguist-vendored=true
 /.github/instructions/** linguist-vendored=true
