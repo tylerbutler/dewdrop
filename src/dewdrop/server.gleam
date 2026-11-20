@@ -55,9 +55,9 @@
 //// rather than reusing an event with different semantics.
 
 import beryl/wire/codec.{
-  type Codec, type DecodeError, type Frame, type Inbound, type ReplyStatus,
-  Event, Heartbeat, InvalidFormat, InvalidJson, Join, Leave, StatusError,
-  StatusOk, TextFrame,
+  type Codec, type DecodeError, type EncodeError, type Frame, type Inbound,
+  type ReplyStatus, Event, Heartbeat, InvalidFormat, InvalidJson, Join, Leave,
+  StatusError, StatusOk, TextFrame,
 }
 import dewdrop/event as fluid_event
 import gleam/dynamic.{type Dynamic}
@@ -187,7 +187,7 @@ fn encode_reply(
   _topic: String,
   status: ReplyStatus,
   payload: Json,
-) -> Frame {
+) -> Result(Frame, EncodeError) {
   let event = case status {
     StatusOk -> fluid_event.connect_document_success
     StatusError -> fluid_event.connect_document_error
@@ -196,17 +196,22 @@ fn encode_reply(
     Some(reference) -> [json.string(reference), payload]
     None -> [payload]
   }
-  TextFrame(windsock.encode(event, arguments))
+  Ok(TextFrame(windsock.encode(event, arguments)))
 }
 
-fn encode_push(topic: String, event: String, payload: Json) -> Frame {
-  case event {
-    event if event == fluid_event.op || event == fluid_event.nack ->
-      TextFrame(
-        windsock.encode(event, [json.string(document_id(topic)), payload]),
-      )
-    _ -> TextFrame(windsock.encode(event, [payload]))
+fn encode_push(
+  topic: String,
+  event: String,
+  payload: Json,
+) -> Result(Frame, EncodeError) {
+  let arguments = case event {
+    event if event == fluid_event.op || event == fluid_event.nack -> [
+      json.string(document_id(topic)),
+      payload,
+    ]
+    _ -> [payload]
   }
+  Ok(TextFrame(windsock.encode(event, arguments)))
 }
 
 /// Decode the document component of a topic derived from a join. Other topics
@@ -221,8 +226,10 @@ fn document_id(topic: String) -> String {
   }
 }
 
-fn encode_heartbeat_reply(_ref: option.Option(String)) -> Frame {
-  TextFrame(windsock.pong)
+fn encode_heartbeat_reply(
+  _ref: option.Option(String),
+) -> Result(Frame, EncodeError) {
+  Ok(TextFrame(windsock.pong))
 }
 
 /// Encode a graceful channel termination as Fluid's `close` event.
@@ -232,6 +239,9 @@ fn encode_heartbeat_reply(_ref: option.Option(String)) -> Frame {
 /// socket has one joined document), so both are dropped and the frame is the
 /// bare `42["close"]` — the server-side mirror of the client's `close`. No
 /// payload is invented because Fluid defines none for this event.
-fn encode_close(_join_ref: option.Option(String), _topic: String) -> Frame {
-  TextFrame(windsock.encode(fluid_event.close, []))
+fn encode_close(
+  _join_ref: option.Option(String),
+  _topic: String,
+) -> Result(Frame, EncodeError) {
+  Ok(TextFrame(windsock.encode(fluid_event.close, [])))
 }
