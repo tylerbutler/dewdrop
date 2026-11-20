@@ -6,8 +6,40 @@ on:
   pull_request:
     branches: [main]
   workflow_call:
+    inputs:
+      ref:
+        description: Immutable release commit to qualify
+        type: string
+        default: ""
 
 jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    name: Changelog
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Trellis
+        uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # ratchet:jdx/mise-action@v4
+        with:
+          install_args: "github:tylerbutler/trellis"
+          github_token: ${{ github.token }}
+
+      - name: Check release configuration
+        run: trellis doctor
+
+      - name: Check changelog fragments
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: trellis changelog check --base "$BASE" --head "$HEAD"
+
   test-erlang:
     runs-on: ubuntu-latest
     strategy:
@@ -21,6 +53,8 @@ jobs:
     name: Test Erlang (OTP ${{ matrix.otp-version }})
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
 
       - name: Setup toolchain
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # ratchet:jdx/mise-action@v4
@@ -59,6 +93,8 @@ jobs:
     name: Docs
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # ratchet:actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
 
       - name: Setup toolchain
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # ratchet:jdx/mise-action@v4

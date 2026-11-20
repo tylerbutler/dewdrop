@@ -156,3 +156,8 @@ Run `just docs` to build the Gleam API documentation. The website is a separate
 Astro page: install its dependencies with `cd website && pnpm install`, then run
 `just site-build` from the repository root. It does not use generated reference
 pages.
+
+## Contributing and releases
+
+See [Contributing](CONTRIBUTING.md) for native Trellis changelog entries and
+the Git-only release process.

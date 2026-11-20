@@ -1,0 +1,9 @@
+package = "dewdrop"
+kind = "Changed"
+body = """
+Return `Result(Frame, EncodeError)` from the server codec's reply, push,
+heartbeat, and close callbacks for Beryl 0.6. Callers must handle
+`Ok(frame)` or `Error(error)`. Beryl's optional close helper returns
+`Option(Result(Frame, EncodeError))`. Socket.IO frame contents, the
+aquamarine codec, and top-level string encoders have not changed.
+"""

@@ -60,16 +60,17 @@ site-build:
 # === CHANGELOG ===
 
 # Create a new changelog entry
-change:
-    changie new
+[positional-arguments]
+change *args:
+    trellis changelog new "$@"
 
 # Preview unreleased changelog
 changelog-preview:
-    changie batch auto --dry-run
+    trellis version plan
 
-# Generate CHANGELOG.md
+# Apply planned versions and generate CHANGELOG.md
 changelog:
-    changie merge
+    trellis version apply
 
 # === MAINTENANCE ===
 
