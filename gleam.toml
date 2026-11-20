@@ -1,5 +1,5 @@
 name = "dewdrop"
-version = "0.1.0"
+version = "0.2.0"
 description = "Fluid Framework protocol codec for aquamarine channel clients"
 licences = ["MIT"]
 repository = { type = "github", user = "tylerbutler", repo = "dewdrop" }
