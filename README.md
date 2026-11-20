@@ -71,6 +71,23 @@ Socket.IO text frames. It decodes `connect_document` as a beryl join, derives a
 `document:<tenant>:<doc>` topic from the connect payload when possible, handles
 heartbeat ping packets, and encodes Fluid replies and pushes through `windsock`.
 
+The server codec requires Beryl 0.6.0. The dependency uses the published Git tag
+`beryl-v0.6.0`, which resolves to commit
+`14325d7edc7647f0889439f6c402d943483166d7`. Beryl has no Hex package.
+The lockfile also includes Beryl's `beryl_heirloom` and `beryl_protocol`
+workspace packages from that commit.
+
+Beryl 0.6 changes outbound encoders from `Frame` to
+`Result(Frame, EncodeError)`. Callers of `codec.apply_encode_reply`,
+`codec.apply_encode_push`, and `codec.apply_encode_heartbeat_reply` must handle
+`Ok(frame)` and `Error(error)`. `codec.apply_encode_close` returns
+`Option(Result(Frame, EncodeError))`: `None` means no encoder, while
+`Some(Error(error))` means encoding failed. Dewdrop's JSON text encoders return
+`Ok(TextFrame(...))`; their Socket.IO frames have not changed. The Beryl runtime
+closes a socket if an encoder fails. Direct codec helpers return the error
+without sending a frame. The aquamarine codec and top-level string encoders
+have not changed.
+
 It also attaches a close encoder, so beryl sends `42["close"]` when a channel
 terminates gracefully (leave, server shutdown, heartbeat eviction) rather than
 letting the client wait out push timeouts. Abnormal termination is not signalled

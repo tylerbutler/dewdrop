@@ -11,8 +11,7 @@ import gleam/option.{None, Some}
 import windsock
 
 fn decode(text: String) -> Result(codec.Inbound, codec.DecodeError) {
-  let server_codec = server.server_codec()
-  codec.decode_text(server_codec)(text)
+  codec.apply_decode_text(server.server_codec(), text)
 }
 
 pub fn maps_connect_document_to_join_with_document_topic_test() -> Nil {
@@ -60,7 +59,7 @@ pub fn round_trips_an_aquamarine_join_test() -> Nil {
     )
     == Ok("d1")
 
-  let assert TextFrame(reply) =
+  let assert Ok(TextFrame(reply)) =
     codec.apply_encode_reply(
       server_codec,
       codec.inbound_join_ref(inbound),
@@ -91,7 +90,7 @@ pub fn round_trips_an_aquamarine_join_rejection_test() -> Nil {
       ]),
     )
   let assert Ok(inbound) = codec.apply_decode_text(server_codec, request)
-  let assert TextFrame(reply) =
+  let assert Ok(TextFrame(reply)) =
     codec.apply_encode_reply(
       server_codec,
       codec.inbound_join_ref(inbound),
@@ -177,38 +176,41 @@ pub fn rejects_socket_io_namespace_connect_test() -> Nil {
 
 pub fn encodes_a_push_as_a_42_frame_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_push(server_codec)(
+  assert codec.apply_encode_push(
+      server_codec,
       "document:t1:d1",
       "signal",
       json.string("x"),
     )
-    == TextFrame("42[\"signal\",\"x\"]")
+    == Ok(TextFrame("42[\"signal\",\"x\"]"))
 }
 
 pub fn encodes_op_with_the_document_id_argument_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_push(server_codec)(
+  assert codec.apply_encode_push(
+      server_codec,
       "document:t1:d1",
       "op",
       json.string("x"),
     )
-    == TextFrame("42[\"op\",\"d1\",\"x\"]")
+    == Ok(TextFrame("42[\"op\",\"d1\",\"x\"]"))
 }
 
 pub fn encodes_nack_with_the_document_id_argument_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_push(server_codec)(
+  assert codec.apply_encode_push(
+      server_codec,
       "document:t1:d1",
       "nack",
       json.string("x"),
     )
-    == TextFrame("42[\"nack\",\"d1\",\"x\"]")
+    == Ok(TextFrame("42[\"nack\",\"d1\",\"x\"]"))
 }
 
 pub fn passes_a_non_document_topic_through_as_the_document_id_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_push(server_codec)("lobby", "op", json.string("x"))
-    == TextFrame("42[\"op\",\"lobby\",\"x\"]")
+  assert codec.apply_encode_push(server_codec, "lobby", "op", json.string("x"))
+    == Ok(TextFrame("42[\"op\",\"lobby\",\"x\"]"))
 }
 
 pub fn distinguishes_identifiers_containing_topic_delimiters_test() -> Nil {
@@ -225,7 +227,7 @@ pub fn round_trips_escaped_document_ids_in_ops_and_nacks_test() -> Nil {
   use document_id <- list.each(["a:b", "%3A:%25", "100%:a/b c", "::"])
   let inbound = document_join("tenant:%3A", document_id)
   use event <- list.each(["op", "nack"])
-  let assert TextFrame(encoded) =
+  let assert Ok(TextFrame(encoded)) =
     codec.apply_encode_push(
       server_codec,
       codec.inbound_topic(inbound),
@@ -253,53 +255,100 @@ fn document_join(tenant: String, document: String) -> codec.Inbound {
 }
 
 pub fn keeps_topicless_events_enabled_test() -> Nil {
-  assert codec.topicless_events(server.server_codec())
+  assert codec.uses_topicless_events(server.server_codec())
 }
 
 pub fn encodes_a_reply_as_connect_document_success_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_reply(server_codec)(
+  assert codec.apply_encode_reply(
+      server_codec,
       None,
       None,
       "t",
       StatusOk,
       json.string("ok"),
     )
-    == TextFrame("42[\"connect_document_success\",\"ok\"]")
+    == Ok(TextFrame("42[\"connect_document_success\",\"ok\"]"))
 }
 
 pub fn encodes_an_error_reply_as_connect_document_error_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_reply(server_codec)(
+  assert codec.apply_encode_reply(
+      server_codec,
       None,
       None,
       "t",
       StatusError,
       json.string("nope"),
     )
-    == TextFrame("42[\"connect_document_error\",\"nope\"]")
+    == Ok(TextFrame("42[\"connect_document_error\",\"nope\"]"))
 }
 
 pub fn answers_heartbeat_with_engine_io_pong_test() -> Nil {
   let server_codec = server.server_codec()
-  assert codec.encode_heartbeat_reply(server_codec)(None) == TextFrame("3")
+  assert codec.apply_encode_heartbeat_reply(server_codec, None)
+    == Ok(TextFrame("3"))
 }
 
 pub fn attaches_a_channel_close_encoder_test() -> Nil {
   let server_codec = server.server_codec()
-  let assert Some(_) = codec.encode_close(server_codec)
+  let assert Some(Ok(_)) = codec.apply_encode_close(server_codec, None, "")
   Nil
 }
 
 pub fn encodes_a_channel_close_as_a_close_frame_test() -> Nil {
   let server_codec = server.server_codec()
-  let assert Some(encode_close) = codec.encode_close(server_codec)
-  assert encode_close(Some("join-1"), "document:t1:d1")
-    == TextFrame("42[\"close\"]")
+  assert codec.apply_encode_close(
+      server_codec,
+      Some("join-1"),
+      "document:t1:d1",
+    )
+    == Some(Ok(TextFrame("42[\"close\"]")))
 }
 
 pub fn encodes_a_channel_close_without_a_join_ref_test() -> Nil {
   let server_codec = server.server_codec()
-  let assert Some(encode_close) = codec.encode_close(server_codec)
-  assert encode_close(None, "") == TextFrame("42[\"close\"]")
+  assert codec.apply_encode_close(server_codec, None, "")
+    == Some(Ok(TextFrame("42[\"close\"]")))
+}
+
+pub fn leaves_abnormal_termination_without_a_frame_test() -> Nil {
+  assert codec.apply_encode_error(
+      server.server_codec(),
+      Some("join-1"),
+      "document:t1:d1",
+    )
+    == None
+}
+
+pub fn preserves_json_escaping_in_result_encoders_test() -> Nil {
+  let server_codec = server.server_codec()
+  let reference = "join\"\\\n"
+  let payload = json.string("payload\"\\\n")
+  let assert Ok(TextFrame(reply)) =
+    codec.apply_encode_reply(
+      server_codec,
+      Some(reference),
+      Some(reference),
+      "document:t1:d1",
+      StatusError,
+      payload,
+    )
+  let assert Ok(incoming) = windsock.decode(reply)
+  let assert [encoded_reference, encoded_payload] = incoming.args
+  assert incoming.event == "connect_document_error"
+  assert decode.run(encoded_reference, decode.string) == Ok(reference)
+  assert decode.run(encoded_payload, decode.string) == Ok("payload\"\\\n")
+
+  let assert Ok(TextFrame(push)) =
+    codec.apply_encode_push(
+      server_codec,
+      "document:t1:d1",
+      "signal\"\\\n",
+      payload,
+    )
+  let assert Ok(incoming) = windsock.decode(push)
+  let assert [encoded_payload] = incoming.args
+  assert incoming.event == "signal\"\\\n"
+  assert decode.run(encoded_payload, decode.string) == Ok("payload\"\\\n")
 }

@@ -1,0 +1,13 @@
+# Changelog
+
+## Unreleased
+
+### Changed
+
+- Upgrade Beryl from 0.5.0 to the published `beryl-v0.6.0` Git tag. Include
+  its `beryl_heirloom` and `beryl_protocol` workspace dependencies.
+- Return `Result(Frame, EncodeError)` from the server codec's reply, push,
+  heartbeat, and close callbacks for Beryl 0.6. Callers must handle
+  `Ok(frame)` or `Error(error)`. Beryl's optional close helper returns
+  `Option(Result(Frame, EncodeError))`. Socket.IO frame contents, the
+  aquamarine codec, and top-level string encoders have not changed.

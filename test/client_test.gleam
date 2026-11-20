@@ -13,8 +13,8 @@ pub fn server_close_reaches_the_channel_and_allows_rejoining_test() -> Nil {
   let #(socket, sink) = start_socket(accept_join)
   let assert Ok(channel) =
     channel.join(socket, "document:t1:d1", join_payload(), 1000)
-  let assert Some(encode_close) = codec.encode_close(server.server_codec())
-  let assert codec.TextFrame(close) = encode_close(Some("1"), "document:t1:d1")
+  let assert Some(Ok(codec.TextFrame(close))) =
+    codec.apply_encode_close(server.server_codec(), Some("1"), "document:t1:d1")
   process.send(sink, transport.Text(close))
   assert channel.receive(channel, 1000) == Error(error.ChannelClosed)
 
@@ -90,7 +90,7 @@ fn accept_join(sink: Subject(transport.Frame), text: String) -> Nil {
   let assert Ok(inbound) = codec.apply_decode_text(server_codec, text)
   case codec.inbound_kind(inbound) {
     codec.Join -> {
-      let assert codec.TextFrame(reply) =
+      let assert Ok(codec.TextFrame(reply)) =
         codec.apply_encode_reply(
           server_codec,
           codec.inbound_join_ref(inbound),
