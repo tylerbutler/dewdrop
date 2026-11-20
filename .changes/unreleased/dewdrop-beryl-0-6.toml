@@ -1,0 +1,6 @@
+package = "dewdrop"
+kind = "Changed"
+body = """
+Upgrade Beryl from 0.5.0 to the published `beryl-v0.6.0` Git tag. Include
+its `beryl_heirloom` and `beryl_protocol` workspace dependencies.
+"""

@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pre:
+        description: Candidate label, none for promotion, or empty for stable
+        type: string
+        default: ""
+      set:
+        description: Exact package=version targets, one per line
+        type: string
+        default: ""
+      bump:
+        description: Bump overrides, one per line
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: read
+  statuses: write
+
+jobs:
+  test:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'release/pending' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+  release:
+    needs: test
+    if: >-
+      always() && !cancelled() &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+       needs.test.result == 'success')
+    uses: tylerbutler/actions/.github/workflows/trellis-release.yml@b4980d28d8c7ad0044fc2d3fdff208cb5aa2a112 # ratchet:tylerbutler/actions/.github/workflows/trellis-release.yml@main
+    with:
+      trellis_version: "1.7.0"
+      release_mode: git_only
+      required_jobs: '["test"]'
+      qualification_results: ${{ toJSON(needs) }}
+      pre: ${{ inputs.pre }}
+      set: ${{ inputs.set }}
+      bump: ${{ inputs.bump }}
+    secrets:
+      app_id: ${{ secrets.RELEASE_APP_ID }}
+      app_private_key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}

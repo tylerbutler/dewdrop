@@ -16,3 +16,26 @@ beryl = { git = "https://github.com/tylerbutler/beryl", ref = "beryl-v0.6.0", pa
 [dev-dependencies]
 gleam_erlang = ">= 1.3.0 and < 2.0.0"
 gleeunit = ">= 1.0.0 and < 2.0.0"
+
+[tools.trellis]
+members = ["."]
+
+[tools.trellis.publish]
+exact_tag_format = "v{version}"
+package_tags = ["exact"]
+repository_tag_package = "dewdrop"
+repository_tag_format = "v{series}"
+repository_tags = ["major", "minor"]
+
+[tools.trellis.publish.lifecycle]
+default = "git_only"
+
+[tools.trellis.release]
+resume = true
+auto_pre = true
+skip_unchanged = true
+
+[tools.trellis.changelog]
+header_format = "# Changelog"
+# Native checks include documentation and development files in this root package.
+strictness = "warn"
