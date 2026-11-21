@@ -157,6 +157,10 @@ Astro page: install its dependencies with `cd website && pnpm install`, then run
 `just site-build` from the repository root. It does not use generated reference
 pages.
 
+Cloudflare Workers Builds uses `website` as its root directory. The
+`website/wrangler.jsonc` file points to the static output in `dist` and enables
+the configured `pnpx wrangler preview` command.
+
 ## Contributing and releases
 
 See [Contributing](CONTRIBUTING.md) for native Trellis changelog entries and

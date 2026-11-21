@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dewdrop",
+  "compatibility_date": "2026-11-20",
+  "assets": {
+    "directory": "./dist"
+  },
+  "previews": {}
+}
